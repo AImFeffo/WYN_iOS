@@ -1,0 +1,9 @@
+# Configurazione progetto Supabase per WYN.
+# project_id corrisponde al ref del progetto remoto "AImFeffo's Project".
+project_id = "odplsmpadzhyhkdoqrne"
+
+[functions.process-link]
+verify_jwt = false
+
+[functions.process-screenshot]
+verify_jwt = false

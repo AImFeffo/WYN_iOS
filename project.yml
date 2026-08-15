@@ -1,0 +1,82 @@
+name: WYN
+options:
+  bundleIdPrefix: com.feffo
+  deploymentTarget:
+    iOS: "26.0"
+  createIntermediateGroups: true
+
+settings:
+  base:
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: "1"
+    SWIFT_VERSION: "5.0"
+    DEVELOPMENT_TEAM: ""
+    CODE_SIGN_STYLE: Automatic
+
+packages:
+  Supabase:
+    url: https://github.com/supabase/supabase-swift.git
+    from: "2.0.0"
+
+targets:
+  WYN:
+    type: application
+    platform: iOS
+    sources:
+      - path: WYN
+        excludes:
+          - "ShareExtension/**"
+    resources:
+      - WYN/Resources/Fonts
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.feffo.wyn
+        INFOPLIST_FILE: WYN/App/Info.plist
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
+        ENABLE_USER_SCRIPT_SANDBOXING: "YES"
+        CODE_SIGN_ENTITLEMENTS: WYN/App/WYN.entitlements
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+    entitlements:
+      path: WYN/App/WYN.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.feffo.wyn
+    dependencies:
+      - package: Supabase
+        product: Supabase
+      - target: ShareExtension
+
+  ShareExtension:
+    type: app-extension
+    platform: iOS
+    sources:
+      # File dell'estensione
+      - path: WYN/ShareExtension
+      # Codice condiviso con l'app (modelli, servizi, config, design system)
+      - path: WYN/Services/SupabaseConfig.swift
+      - path: WYN/Services/SupabaseManager.swift
+      - path: WYN/Services/AppGroupStorage.swift
+      - path: WYN/Services/NotesService.swift
+      - path: WYN/Services/ProcessingService.swift
+      - path: WYN/Services/ImageCompressor.swift
+      - path: WYN/Models/Note.swift
+      - path: WYN/Models/Category.swift
+      - path: WYN/DesignSystem/Color+WYN.swift
+      - path: WYN/DesignSystem/Font+WYN.swift
+      - path: WYN/DesignSystem/String+Extensions.swift
+    resources:
+      - WYN/Resources/Fonts
+      - WYN/Resources/Assets.xcassets
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.feffo.wyn.share
+        INFOPLIST_FILE: WYN/ShareExtension/Info.plist
+        CODE_SIGN_ENTITLEMENTS: WYN/ShareExtension/ShareExtension.entitlements
+    entitlements:
+      path: WYN/ShareExtension/ShareExtension.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.feffo.wyn
+    dependencies:
+      - package: Supabase
+        product: Supabase
