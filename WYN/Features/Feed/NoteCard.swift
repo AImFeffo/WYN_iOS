@@ -1,14 +1,18 @@
 import SwiftUI
 
 /// Card di una nota nel feed. Estetica editoriale: badge categoria, titolo serif,
-/// riga meta monospace, tag.
+/// riga meta monospace, tipo di fonte scritto, miniatura per gli screenshot, tag.
 struct NoteCard: View {
     let note: Note
+
+    /// Signed URL dell'immagine (solo screenshot), caricata lazy per card visibile.
+    @State private var thumbnailURL: URL?
+    private let service = NotesService()
 
     private var category: Category { Category.from(note.category) }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: 13) {
             HStack(spacing: 12) {
                 CategoryBadge(category: category, size: 38)
                 VStack(alignment: .leading, spacing: 3) {
@@ -20,17 +24,21 @@ struct NoteCard: View {
                         .foregroundStyle(Color.ink3)
                 }
                 Spacer()
-                Image(systemName: note.sourceType == .article ? "link" : "photo")
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundStyle(Color.ink3)
+                SourceTypeBadge(sourceType: note.sourceType)
             }
 
-            Text(note.title)
-                .font(.heading(21, weight: .medium))
-                .tracking(-0.4)
-                .foregroundStyle(Color.ink)
-                .fixedSize(horizontal: false, vertical: true)
-                .lineLimit(3)
+            HStack(alignment: .top, spacing: 14) {
+                Text(note.title)
+                    .font(.heading(21, weight: .medium))
+                    .tracking(-0.4)
+                    .foregroundStyle(Color.ink)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .lineLimit(3)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                if note.sourceType == .screenshot {
+                    thumbnail
+                }
+            }
 
             if let first = note.summaryPoints.first {
                 Text(first)
@@ -51,6 +59,23 @@ struct NoteCard: View {
             RoundedRectangle(cornerRadius: 18, style: .continuous)
                 .stroke(Color.hairline, lineWidth: 1)
         )
+        .task(id: note.id) { await loadThumbnail() }
+    }
+
+    private var thumbnail: some View {
+        AsyncImage(url: thumbnailURL) { phase in
+            if let image = phase.image {
+                image.resizable().scaledToFill()
+            } else {
+                Color.fill
+            }
+        }
+        .frame(width: 66, height: 66)
+        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .stroke(Color.hairline, lineWidth: 1)
+        )
     }
 
     private var metaLine: String {
@@ -59,6 +84,12 @@ struct NoteCard: View {
         if let read = note.readTimeLabel, !read.isEmpty { parts.append(read) }
         parts.append(ItalianDate.relative(note.createdAt))
         return parts.joined(separator: " · ")
+    }
+
+    private func loadThumbnail() async {
+        guard note.sourceType == .screenshot, thumbnailURL == nil,
+              let path = note.imagePaths?.first else { return }
+        thumbnailURL = try? await service.signedImageURL(path: path)
     }
 }
 
@@ -74,7 +105,7 @@ struct TagRow: View {
                     .foregroundStyle(Color.ink2)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
-                    .background(Color.ink.opacity(0.05))
+                    .background(Color.fill)
                     .clipShape(Capsule())
             }
         }
