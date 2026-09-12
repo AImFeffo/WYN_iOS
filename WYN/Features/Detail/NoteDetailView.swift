@@ -46,18 +46,26 @@ struct NoteDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
+                Button { share() } label: {
+                    HStack(spacing: 7) {
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.system(size: 13, weight: .semibold))
+                        Text("Condividi").monoLabel(size: 10.5, weight: .semibold)
+                    }
+                    .foregroundStyle(Color.ink)
+                }
+            }
+            ToolbarItem(placement: .topBarTrailing) {
                 Menu {
                     Button { showTagEditor = true } label: {
                         Label("Modifica tag", systemImage: "tag")
-                    }
-                    Button { share() } label: {
-                        Label("Condividi", systemImage: "square.and.arrow.up")
                     }
                     Button(role: .destructive) { showDeleteConfirm = true } label: {
                         Label("Elimina", systemImage: "trash")
                     }
                 } label: {
-                    Image(systemName: "ellipsis.circle")
+                    Image(systemName: "ellipsis")
+                        .foregroundStyle(Color.ink)
                 }
             }
         }
@@ -96,11 +104,17 @@ struct NoteDetailView: View {
                 Text(ItalianDate.relative(note.createdAt))
                     .monoLabel(size: 11)
                     .foregroundStyle(Color.ink3)
+                if let source = note.sourceName, !source.isEmpty {
+                    Text("·").foregroundStyle(Color.ink3)
+                    Text(source).monoLabel(size: 11).foregroundStyle(Color.ink3)
+                }
                 if let read = note.readTimeLabel {
                     Text("·").foregroundStyle(Color.ink3)
                     Text(read).monoLabel(size: 11).foregroundStyle(Color.ink3)
                 }
             }
+            .lineLimit(1)
+            .minimumScaleFactor(0.85)
         }
     }
 

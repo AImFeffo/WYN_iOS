@@ -41,6 +41,8 @@ struct FeedView: View {
                 Color.bg.ignoresSafeArea()
                 if showsOnboarding { onboarding } else { content }
             }
+            .navigationTitle("Feed")
+            .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(item: $selectedNote) { note in
                 NoteDetailView(note: note, store: store)
             }
