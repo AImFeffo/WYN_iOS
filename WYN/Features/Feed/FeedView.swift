@@ -29,11 +29,17 @@ struct FeedView: View {
         }
     }
 
+    /// Nessuna nota e nulla in corso: schermata di spiegazione con AddBar in fondo.
+    private var showsOnboarding: Bool {
+        store.notes.isEmpty && !store.isLoading
+            && store.processing.isEmpty && store.processingErrors.isEmpty
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
                 Color.bg.ignoresSafeArea()
-                content
+                if showsOnboarding { onboarding } else { content }
             }
             .navigationDestination(item: $selectedNote) { note in
                 NoteDetailView(note: note, store: store)
@@ -99,6 +105,103 @@ struct FeedView: View {
         .scrollDismissesKeyboard(.immediately)
     }
 
+    private var onboarding: some View {
+        VStack(spacing: 0) {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    masthead.padding(.horizontal, 20)
+
+                    VStack(alignment: .leading, spacing: 22) {
+                        Text("Salva quello che leggi.\nRitrovalo fra un mese.")
+                            .font(.heading(27, weight: .medium))
+                            .tracking(-0.6)
+                            .foregroundStyle(Color.ink)
+                            .fixedSize(horizontal: false, vertical: true)
+                        VStack(alignment: .leading, spacing: 14) {
+                            onboardingStep("01", "Incolli un link o carichi uno screenshot.")
+                            onboardingStep("02", "L'AI ne estrae titolo, 3–5 punti chiave, categoria e tag.")
+                            onboardingStep("03", "Lo ricerchi per le parole che ricordi.")
+                        }
+                    }
+                    .padding(.horizontal, 32)
+                    .padding(.top, 8)
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Esempio · come apparirà")
+                            .monoLabel(size: 9)
+                            .foregroundStyle(Color.ink3)
+                        exampleCard
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 6)
+                }
+                .padding(.vertical, 16)
+            }
+            .refreshable { await store.load() }
+            .scrollDismissesKeyboard(.immediately)
+
+            VStack(spacing: 8) {
+                AddBar(
+                    linkText: $linkText,
+                    hint: $linkHint,
+                    isBusy: isSavingLink,
+                    onSave: saveLink,
+                    onCamera: { showScreenshotSheet = true }
+                )
+                Text("Link o screenshot · pronta in ~15 secondi")
+                    .monoLabel(size: 9)
+                    .foregroundStyle(Color.ink3)
+            }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 14)
+        }
+    }
+
+    private func onboardingStep(_ number: String, _ text: String) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            Text(number)
+                .font(.mono(11, weight: .semibold))
+                .foregroundStyle(Color.ink3)
+                .frame(width: 14, alignment: .leading)
+            Text(text)
+                .font(.body(14.5))
+                .foregroundStyle(Color.ink2)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    /// Card d'esempio: tratteggiata e opaca, chiaramente non tappabile.
+    private var exampleCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 10) {
+                CategoryBadge(category: .tech, size: 32)
+                Text(Category.tech.displayName)
+                    .monoLabel(size: 10)
+                    .foregroundStyle(Category.tech.color)
+            }
+            Text("Perché i modelli piccoli stanno vincendo sull'edge")
+                .font(.heading(19, weight: .medium))
+                .tracking(-0.3)
+                .foregroundStyle(Color.ink)
+                .fixedSize(horizontal: false, vertical: true)
+            Text("Il costo di inferenza per token è crollato del 90% in diciotto mesi.")
+                .font(.body(13.5))
+                .foregroundStyle(Color.ink2)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.surface)
+        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .stroke(Color.hairlineStrong, style: StrokeStyle(lineWidth: 1, dash: [4, 3]))
+        )
+        .opacity(0.62)
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+
     private var masthead: some View {
         HStack(alignment: .firstTextBaseline) {
             Text("WYN")
@@ -129,10 +232,10 @@ struct FeedView: View {
 
     private var emptyState: some View {
         VStack(spacing: 8) {
-            Text("Nessuna nota ancora")
+            Text("Nessuna nota con questo filtro")
                 .font(.heading(20, weight: .medium))
                 .foregroundStyle(Color.ink)
-            Text("Incolla un link o carica uno screenshot qui sopra")
+            Text("Prova a togliere un filtro o a cambiare categoria")
                 .font(.body(14))
                 .foregroundStyle(Color.ink3)
                 .multilineTextAlignment(.center)
