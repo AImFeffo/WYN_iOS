@@ -73,7 +73,7 @@ struct FeedView: View {
                     ProcessingCard(item: item).padding(.horizontal, 20)
                 }
                 ForEach(store.processingErrors) { err in
-                    ErrorCard(message: err.message) {
+                    ErrorCard(message: err.message, kind: err.kind) {
                         store.processingErrors.removeAll { $0.id == err.id }
                     }
                     .padding(.horizontal, 20)
@@ -168,7 +168,7 @@ struct FeedView: View {
                 await store.refresh()
                 Haptics.success()
             } catch {
-                store.processingErrors.append(ProcessingError(message: error.localizedDescription))
+                store.processingErrors.append(ProcessingError(message: error.localizedDescription, kind: .article))
             }
             store.processing.removeAll { $0.id == item.id }
         }
@@ -183,7 +183,7 @@ struct FeedView: View {
                 await store.refresh()
                 Haptics.success()
             } catch {
-                store.processingErrors.append(ProcessingError(message: error.localizedDescription))
+                store.processingErrors.append(ProcessingError(message: error.localizedDescription, kind: .screenshot))
             }
             store.processing.removeAll { $0.id == item.id }
         }
