@@ -26,7 +26,7 @@ struct ProfileView: View {
             ZStack {
                 Color.bg.ignoresSafeArea()
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 26) {
+                    VStack(alignment: .leading, spacing: 18) {
                         userHeader
                         statsSection
                         settingsSection
@@ -64,9 +64,9 @@ struct ProfileView: View {
     }
 
     private var statsSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 11) {
             sectionTitle("Statistiche")
-            HStack(spacing: 12) {
+            HStack(spacing: 11) {
                 StatTile(value: "\(total)", label: "Note")
                 StatTile(value: "\(articles)", label: "Articoli")
                 StatTile(value: "\(screenshots)", label: "Screenshot")
@@ -76,7 +76,7 @@ struct ProfileView: View {
     }
 
     private var settingsSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 11) {
             sectionTitle("Impostazioni")
             HStack {
                 Text("Tema scuro").font(.body(16)).foregroundStyle(Color.ink)
@@ -88,7 +88,8 @@ struct ProfileView: View {
                 .labelsHidden()
                 .tint(Color.ink)
             }
-            .padding(16)
+            .padding(.horizontal, 16)
+            .frame(minHeight: 56)
             .background(Color.surface)
             .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous)
@@ -97,9 +98,9 @@ struct ProfileView: View {
     }
 
     private var exportSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 11) {
             sectionTitle("Esporta note")
-            HStack(spacing: 12) {
+            HStack(spacing: 11) {
                 exportButton("JSON") { export(.json) }
                 exportButton("Markdown") { export(.markdown) }
             }
@@ -107,7 +108,7 @@ struct ProfileView: View {
     }
 
     private var infoSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 11) {
             sectionTitle("Informazioni")
             infoRow("Versione", "1.0.0")
             if let created = auth.user?.createdAt {
@@ -158,10 +159,11 @@ struct ProfileView: View {
             if showChevron {
                 Image(systemName: "chevron.right")
                     .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(Color.ink3)
+                    .foregroundStyle(Color.inkDecor)
             }
         }
-        .padding(.vertical, 10)
+        .padding(.vertical, 11)
+        .frame(minHeight: 44)
         .overlay(alignment: .bottom) {
             Rectangle().fill(Color.hairline).frame(height: 1)
         }
