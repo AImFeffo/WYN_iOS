@@ -128,3 +128,6 @@ Share Extension (tap share sheet), fotocamera, PHPicker interattivo, notifiche, 
 - `Category` non rinominato: compila senza collisioni (warning SourceKit "OpaquePointer" era rumore).
 - Modello AI `claude-sonnet-4-6` come da spec (centralizzato in `_shared/wyn.ts`); flaggato come possibile ID obsoleto ma funziona.
 - Cruft residuo (rimuovibile dal dashboard): 2 utenti `wyn-test-*@example.com` (0 note) + eventuale utente di test iniziale.
+
+## Redesign UI (mockup Claude Design) ✅
+Piano ed esecuzione: `UI_REDESIGN_PLAN.md` (Task 0–9, 11 commit su `new_features`). Fuori scope: §5 del piano. Screenshot before/after in `tasks/ui-screens/` (non versionati).
