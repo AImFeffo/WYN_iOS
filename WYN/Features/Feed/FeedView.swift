@@ -55,16 +55,12 @@ struct FeedView: View {
 
                 AddBar(
                     linkText: $linkText,
+                    hint: $linkHint,
                     isBusy: isSavingLink,
                     onSave: saveLink,
                     onCamera: { showScreenshotSheet = true }
                 )
                 .padding(.horizontal, 20)
-
-                if !linkText.trimmed.isEmpty {
-                    HintField(hint: $linkHint)
-                        .padding(.horizontal, 20)
-                }
 
                 if forcedCategory != nil {
                     categoryBanner.padding(.horizontal, 20)
