@@ -89,7 +89,7 @@ struct FeedView: View {
 
                 if store.isLoading && store.notes.isEmpty {
                     loadingState
-                } else if visibleNotes.isEmpty && store.processing.isEmpty {
+                } else if visibleNotes.isEmpty && store.processing.isEmpty && !store.notes.isEmpty {
                     emptyState
                 } else {
                     ForEach(visibleNotes) { note in
