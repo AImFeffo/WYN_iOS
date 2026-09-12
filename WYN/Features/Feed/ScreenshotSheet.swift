@@ -16,13 +16,18 @@ struct ScreenshotSheet: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
+        VStack(alignment: .leading, spacing: 18) {
             Text("Carica screenshot")
                 .font(.heading(24, weight: .medium))
+                .tracking(-0.4)
                 .foregroundStyle(Color.ink)
                 .padding(.top, 8)
 
-            HintField(hint: $hint)
+            HighlightField(text: $hint)
+                .background(Color.surface)
+                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .stroke(Color.hairline, lineWidth: 1))
 
             VStack(spacing: 12) {
                 optionButton(icon: "photo.on.rectangle", label: "Scegli da Libreria") {
@@ -40,11 +45,16 @@ struct ScreenshotSheet: View {
                     .foregroundStyle(Color.ink3)
             }
 
-            Spacer()
+            Text("Funziona meglio con screenshot di testo: didascalie, thread, ricette. Le foto di oggetti raramente contengono testo leggibile.")
+                .font(.body(12.5))
+                .foregroundStyle(Color.ink2)
+                .fixedSize(horizontal: false, vertical: true)
+
+            Spacer(minLength: 0)
         }
         .padding(20)
         .background(Color.bg.ignoresSafeArea())
-        .presentationDetents([.height(360)])
+        .presentationDetents([.height(430)])
         .presentationDragIndicator(.visible)
         .fullScreenCover(isPresented: $showLibrary) {
             LibraryPicker { image in deliver(image) }
@@ -65,7 +75,7 @@ struct ScreenshotSheet: View {
     private func optionButton(icon: String, label: String, enabled: Bool = true,
                               action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            HStack(spacing: 12) {
+            HStack(spacing: 14) {
                 Image(systemName: icon)
                     .font(.system(size: 18, weight: .medium))
                     .frame(width: 24)
@@ -73,11 +83,11 @@ struct ScreenshotSheet: View {
                 Spacer()
                 Image(systemName: "chevron.right")
                     .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(Color.ink3)
+                    .foregroundStyle(Color.inkDecor)
             }
             .foregroundStyle(enabled ? Color.ink : Color.ink3)
-            .padding(16)
-            .frame(maxWidth: .infinity)
+            .padding(.horizontal, 16)
+            .frame(maxWidth: .infinity, minHeight: 56)
             .background(Color.surface)
             .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous)
@@ -85,26 +95,5 @@ struct ScreenshotSheet: View {
         }
         .buttonStyle(.plain)
         .disabled(!enabled)
-    }
-}
-
-/// Campo hint opzionale "Cosa vuoi evidenziare?" (max 150 char).
-struct HintField: View {
-    @Binding var hint: String
-    private let maxLength = 150
-
-    var body: some View {
-        TextField("Cosa vuoi evidenziare? (facoltativo)", text: $hint, axis: .vertical)
-            .font(.body(15))
-            .foregroundStyle(Color.ink)
-            .lineLimit(1...3)
-            .onChange(of: hint) { _, v in
-                if v.count > maxLength { hint = String(v.prefix(maxLength)) }
-            }
-            .padding(14)
-            .background(Color.surface)
-            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .stroke(Color.hairline, lineWidth: 1))
     }
 }
