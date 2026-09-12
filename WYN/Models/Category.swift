@@ -18,16 +18,16 @@ enum Category: String, CaseIterable, Identifiable, Sendable {
     /// Nome mostrato in UI (coincide col valore salvato nel DB).
     var displayName: String { rawValue }
 
-    /// Colore associato (§3).
+    /// Colore associato (§3). Variante dark schiarita per contrasto ≥ 3:1 (Asset Catalog).
     var color: Color {
         switch self {
-        case .tech:     return Color(hex: 0x2C5266)
-        case .salute:   return Color(hex: 0x5E7E6B)
-        case .business: return Color(hex: 0xB0884A)
-        case .cucina:   return Color(hex: 0xAE5F3D)
-        case .design:   return Color(hex: 0x6E5E84)
-        case .finanza:  return Color(hex: 0x3B5A52)
-        case .altro:    return Color(hex: 0x8C8478)
+        case .tech:     return Color("catTech")
+        case .salute:   return Color("catSalute")
+        case .business: return Color("catBusiness")
+        case .cucina:   return Color("catCucina")
+        case .design:   return Color("catDesign")
+        case .finanza:  return Color("catFinanza")
+        case .altro:    return Color("catAltro")
         }
     }
 
