@@ -9,6 +9,9 @@ struct SearchView: View {
     @FocusState private var focused: Bool
     @State private var selectedNote: Note?
 
+    /// Termine normalizzato usato sia dal filtro sia dall'evidenziazione.
+    private var term: String { debounced.trimmed.lowercased() }
+
     /// Filtro client-side case-insensitive su title, source_name, tags, summary_points.
     private var results: [Note] {
         let q = debounced.trimmed.lowercased()
@@ -50,8 +53,9 @@ struct SearchView: View {
     private var searchField: some View {
         HStack(spacing: 10) {
             Image(systemName: "magnifyingglass")
-                .foregroundStyle(Color.ink3)
-            TextField("Cerca per concetto, non per titolo…", text: $query)
+                .font(.system(size: 15, weight: .medium))
+                .foregroundStyle(Color.ink2)
+            TextField("Cerca una parola nelle note…", text: $query)
                 .font(.body(16))
                 .foregroundStyle(Color.ink)
                 .textInputAutocapitalization(.never)
@@ -59,7 +63,12 @@ struct SearchView: View {
                 .focused($focused)
             if !query.isEmpty {
                 Button { query = ""; debounced = "" } label: {
-                    Image(systemName: "xmark.circle.fill").foregroundStyle(Color.ink3)
+                    Image(systemName: "xmark")
+                        .font(.system(size: 9, weight: .bold))
+                        .foregroundStyle(Color.ink)
+                        .frame(width: 22, height: 22)
+                        .background(Color.ink.opacity(0.14))
+                        .clipShape(Circle())
                 }
                 .buttonStyle(.plain)
             }
@@ -69,7 +78,7 @@ struct SearchView: View {
         .background(Color.surface)
         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous)
-            .stroke(Color.hairline, lineWidth: 1))
+            .stroke(focused ? Color.ink : Color.hairline, lineWidth: focused ? 1.5 : 1))
         .padding(.horizontal, 20)
     }
 
@@ -82,13 +91,19 @@ struct SearchView: View {
         } else {
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 12) {
-                    Text("\(results.count) risultati")
-                        .monoLabel(size: 11)
-                        .foregroundStyle(Color.ink3)
-                        .padding(.horizontal, 20)
+                    HStack(alignment: .firstTextBaseline) {
+                        Text("\(results.count) risultati")
+                            .monoLabel(size: 11)
+                            .foregroundStyle(Color.ink3)
+                        Spacer()
+                        Text("Corrispondenza testuale")
+                            .monoLabel(size: 9)
+                            .foregroundStyle(Color.ink3)
+                    }
+                    .padding(.horizontal, 20)
                     ForEach(results) { note in
                         Button { selectedNote = note } label: {
-                            ResultCard(note: note)
+                            ResultCard(note: note, term: term)
                         }
                         .buttonStyle(.plain)
                         .padding(.horizontal, 20)
@@ -101,12 +116,45 @@ struct SearchView: View {
     }
 
     private var emptyPrompt: some View {
-        VStack(spacing: 6) {
-            Spacer()
-            Text("Cerca tra le tue note")
-                .font(.heading(19, weight: .medium))
-                .foregroundStyle(Color.ink2)
-            Spacer()
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                Text("La ricerca confronta il testo, non il significato")
+                    .font(.heading(22, weight: .medium))
+                    .tracking(-0.4)
+                    .foregroundStyle(Color.ink)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text("Scrivi una parola che compare nella nota. Cercare «come risparmiare» non trova una nota che parla di «TER» e «commissioni».")
+                    .font(.body(14.5))
+                    .foregroundStyle(Color.ink2)
+                    .fixedSize(horizontal: false, vertical: true)
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("Campi confrontati")
+                        .monoLabel(size: 9)
+                        .foregroundStyle(Color.ink3)
+                        .padding(.bottom, 8)
+                    comparedField("Titolo")
+                    comparedField("Punti chiave")
+                    comparedField("Tag")
+                    comparedField("Nome della fonte")
+                    Rectangle().fill(Color.hairline).frame(height: 1)
+                }
+                .padding(.top, 4)
+            }
+            .padding(.horizontal, 28)
+            .padding(.top, 10)
+        }
+        .scrollDismissesKeyboard(.immediately)
+    }
+
+    private func comparedField(_ name: String) -> some View {
+        VStack(spacing: 0) {
+            Rectangle().fill(Color.hairline).frame(height: 1)
+            HStack {
+                Text(name).font(.body(14)).foregroundStyle(Color.ink)
+                Spacer()
+                Text("testo esatto").font(.mono(11)).foregroundStyle(Color.ink3)
+            }
+            .padding(.vertical, 10)
         }
     }
 
@@ -124,30 +172,105 @@ struct SearchView: View {
     }
 }
 
-/// Card compatta per un risultato di ricerca.
+/// Dove il termine ha fatto match. Stessa precedenza del filtro `results`.
+enum SearchMatch {
+    case title, source, tag(String), keyPoint(String)
+
+    static func find(in note: Note, term q: String) -> SearchMatch {
+        if note.title.lowercased().contains(q) { return .title }
+        if let s = note.sourceName?.lowercased(), s.contains(q) { return .source }
+        if let t = note.tags.first(where: { $0.lowercased().contains(q) }) { return .tag(t) }
+        if let p = note.summaryPoints.first(where: { $0.lowercased().contains(q) }) { return .keyPoint(p) }
+        return .title
+    }
+
+    var label: String {
+        switch self {
+        case .title:    return "Trovato nel titolo"
+        case .source:   return "Trovato nella fonte"
+        case .tag:      return "Trovato nei tag"
+        case .keyPoint: return "Trovato nei punti chiave"
+        }
+    }
+}
+
+/// Evidenzia tutte le occorrenze (case-insensitive) di `term` con lo sfondo `match`.
+func highlighted(_ text: String, term: String) -> AttributedString {
+    var result = AttributedString(text)
+    guard !term.isEmpty else { return result }
+    var searchRange = text.startIndex..<text.endIndex
+    while let found = text.range(of: term, options: .caseInsensitive, range: searchRange) {
+        if let range = Range(found, in: result) {
+            result[range].backgroundColor = Color.match
+        }
+        searchRange = found.upperBound..<text.endIndex
+    }
+    return result
+}
+
+/// Card di un risultato: titolo, dove ha fatto match, termine evidenziato nel contesto.
 struct ResultCard: View {
     let note: Note
+    let term: String
+
     private var category: Category { Category.from(note.category) }
+    private var match: SearchMatch { SearchMatch.find(in: note, term: term) }
 
     var body: some View {
-        HStack(spacing: 12) {
-            CategoryBadge(category: category, size: 36)
-            VStack(alignment: .leading, spacing: 3) {
-                Text(note.title)
-                    .font(.heading(16, weight: .medium))
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 10) {
+                CategoryBadge(category: category, size: 32)
+                Text(highlighted(note.title, term: term))
+                    .font(.heading(17, weight: .medium))
                     .foregroundStyle(Color.ink)
                     .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
-                Text(category.displayName)
-                    .monoLabel(size: 10)
-                    .foregroundStyle(Color.ink3)
+                Spacer(minLength: 0)
             }
-            Spacer()
+
+            HStack(spacing: 7) {
+                RoundedRectangle(cornerRadius: 2)
+                    .fill(Category.business.color)
+                    .frame(width: 3, height: 10)
+                Text(match.label)
+                    .monoLabel(size: 9, weight: .semibold)
+                    .foregroundStyle(Color.ink2)
+            }
+
+            switch match {
+            case .keyPoint(let point):
+                Text(highlighted("«\(point)»", term: term))
+                    .font(.body(13.5))
+                    .foregroundStyle(Color.ink)
+                    .lineLimit(3)
+                    .fixedSize(horizontal: false, vertical: true)
+            case .tag(let hit):
+                HStack(spacing: 6) {
+                    ForEach(Array(note.tags.prefix(4)), id: \.self) { tag in
+                        Text(tag)
+                            .font(.mono(10.5, weight: tag == hit ? .semibold : .medium))
+                            .foregroundStyle(tag == hit ? Color.ink : Color.ink2)
+                            .padding(.horizontal, 9)
+                            .padding(.vertical, 4)
+                            .background(tag == hit ? Color.match : Color.fill)
+                            .clipShape(Capsule())
+                    }
+                }
+            case .source:
+                if let source = note.sourceName {
+                    Text(highlighted(source, term: term))
+                        .font(.body(13.5))
+                        .foregroundStyle(Color.ink)
+                }
+            case .title:
+                EmptyView()
+            }
         }
-        .padding(14)
+        .padding(EdgeInsets(top: 15, leading: 16, bottom: 15, trailing: 16))
+        .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color.surface)
-        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous)
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous)
             .stroke(Color.hairline, lineWidth: 1))
     }
 }
