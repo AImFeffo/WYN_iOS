@@ -9,11 +9,21 @@ struct SearchView: View {
     @FocusState private var focused: Bool
     @State private var selectedNote: Note?
 
+    /// Ricerca per significato (Edge Function search-notes), in parallelo al filtro testuale.
+    @State private var semanticIDs: [UUID] = []
+    @State private var semanticState: SemanticState = .idle
+    @State private var semanticTask: Task<Void, Never>?
+    private let service = NotesService()
+
+    private enum SemanticState { case idle, loading, done, failed }
+    /// Sotto questa lunghezza la ricerca semantica non parte (evita chiamate per 1-2 lettere).
+    private static let minSemanticLength = 3
+
     /// Termine normalizzato usato sia dal filtro sia dall'evidenziazione.
     private var term: String { debounced.trimmed.lowercased() }
 
     /// Filtro client-side case-insensitive su title, source_name, tags, summary_points.
-    private var results: [Note] {
+    private var textResults: [Note] {
         let q = debounced.trimmed.lowercased()
         guard !q.isEmpty else { return [] }
         return store.notes.filter { note in
@@ -24,6 +34,17 @@ struct SearchView: View {
             return false
         }
     }
+
+    /// Note trovate per significato e non già presenti nei risultati testuali.
+    private var semanticResults: [Note] {
+        let textIDs = Set(textResults.map(\.id))
+        return semanticIDs.compactMap { id in
+            textIDs.contains(id) ? nil : store.notes.first { $0.id == id }
+        }
+    }
+
+    /// Prima i match testuali (ordine attuale), poi quelli per significato.
+    private var results: [Note] { textResults + semanticResults }
 
     var body: some View {
         NavigationStack {
@@ -48,6 +69,30 @@ struct SearchView: View {
                 debounced = newValue
             }
         }
+        .onChange(of: debounced) { _, newValue in
+            runSemanticSearch(for: newValue.trimmed)
+        }
+    }
+
+    private func runSemanticSearch(for term: String) {
+        semanticTask?.cancel()
+        semanticIDs = []
+        guard term.count >= Self.minSemanticLength else {
+            semanticState = .idle
+            return
+        }
+        semanticState = .loading
+        semanticTask = Task {
+            do {
+                let ids = try await service.semanticMatches(query: term)
+                guard !Task.isCancelled else { return }
+                semanticIDs = ids
+                semanticState = .done
+            } catch {
+                guard !Task.isCancelled else { return }
+                semanticState = .failed
+            }
+        }
     }
 
     private var searchField: some View {
@@ -55,7 +100,7 @@ struct SearchView: View {
             Image(systemName: "magnifyingglass")
                 .font(.system(size: 15, weight: .medium))
                 .foregroundStyle(Color.ink2)
-            TextField("Cerca una parola nelle note…", text: $query)
+            TextField("Cerca per concetto, non per titolo…", text: $query)
                 .font(.body(16))
                 .foregroundStyle(Color.ink)
                 .textInputAutocapitalization(.never)
@@ -87,8 +132,9 @@ struct SearchView: View {
         if debounced.trimmed.isEmpty {
             emptyPrompt
         } else if results.isEmpty {
-            noResults
+            if semanticState == .loading { semanticLoading } else { noResults }
         } else {
+            let textIDs = Set(textResults.map(\.id))
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 12) {
                     HStack(alignment: .firstTextBaseline) {
@@ -96,14 +142,20 @@ struct SearchView: View {
                             .monoLabel(size: 11)
                             .foregroundStyle(Color.ink3)
                         Spacer()
-                        Text("Corrispondenza testuale")
+                        Text(modeLabel)
                             .monoLabel(size: 9)
                             .foregroundStyle(Color.ink3)
                     }
                     .padding(.horizontal, 20)
                     ForEach(results) { note in
                         Button { selectedNote = note } label: {
-                            ResultCard(note: note, term: term)
+                            ResultCard(
+                                note: note,
+                                term: term,
+                                match: textIDs.contains(note.id)
+                                    ? SearchMatch.find(in: note, term: term)
+                                    : .semantic
+                            )
                         }
                         .buttonStyle(.plain)
                         .padding(.horizontal, 20)
@@ -115,15 +167,35 @@ struct SearchView: View {
         }
     }
 
+    /// Etichetta a destra del conteggio: dice cosa sta confrontando la ricerca.
+    private var modeLabel: String {
+        switch semanticState {
+        case .idle:    return "Corrispondenza testuale"
+        case .loading: return "cerco per significato…"
+        case .done:    return "Testo e significato"
+        case .failed:  return "Solo corrispondenza testuale"
+        }
+    }
+
+    private var semanticLoading: some View {
+        VStack(spacing: 6) {
+            Spacer()
+            Text("Cerco per significato…")
+                .monoLabel(size: 11)
+                .foregroundStyle(Color.ink3)
+            Spacer()
+        }
+    }
+
     private var emptyPrompt: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                Text("La ricerca confronta il testo, non il significato")
+                Text("Cerca per concetto, non solo per parola")
                     .font(.heading(22, weight: .medium))
                     .tracking(-0.4)
                     .foregroundStyle(Color.ink)
                     .fixedSize(horizontal: false, vertical: true)
-                Text("Scrivi una parola che compare nella nota. Cercare «come risparmiare» non trova una nota che parla di «TER» e «commissioni».")
+                Text("Scrivi una parola che compare nella nota, oppure descrivi quello che ricordi. Cercare «come risparmiare» trova anche una nota che parla di «TER» e «commissioni».")
                     .font(.body(14.5))
                     .foregroundStyle(Color.ink2)
                     .fixedSize(horizontal: false, vertical: true)
@@ -132,10 +204,10 @@ struct SearchView: View {
                         .monoLabel(size: 9)
                         .foregroundStyle(Color.ink3)
                         .padding(.bottom, 8)
-                    comparedField("Titolo")
-                    comparedField("Punti chiave")
-                    comparedField("Tag")
-                    comparedField("Nome della fonte")
+                    comparedField("Titolo", "testo e significato")
+                    comparedField("Punti chiave", "testo e significato")
+                    comparedField("Tag", "testo esatto")
+                    comparedField("Nome della fonte", "testo esatto")
                     Rectangle().fill(Color.hairline).frame(height: 1)
                 }
                 .padding(.top, 4)
@@ -146,13 +218,13 @@ struct SearchView: View {
         .scrollDismissesKeyboard(.immediately)
     }
 
-    private func comparedField(_ name: String) -> some View {
+    private func comparedField(_ name: String, _ mode: String) -> some View {
         VStack(spacing: 0) {
             Rectangle().fill(Color.hairline).frame(height: 1)
             HStack {
                 Text(name).font(.body(14)).foregroundStyle(Color.ink)
                 Spacer()
-                Text("testo esatto").font(.mono(11)).foregroundStyle(Color.ink3)
+                Text(mode).font(.mono(11)).foregroundStyle(Color.ink3)
             }
             .padding(.vertical, 10)
         }
@@ -174,7 +246,7 @@ struct SearchView: View {
 
 /// Dove il termine ha fatto match. Stessa precedenza del filtro `results`.
 enum SearchMatch {
-    case title, source, tag(String), keyPoint(String)
+    case title, source, tag(String), keyPoint(String), semantic
 
     static func find(in note: Note, term q: String) -> SearchMatch {
         if note.title.lowercased().contains(q) { return .title }
@@ -190,6 +262,7 @@ enum SearchMatch {
         case .source:   return "Trovato nella fonte"
         case .tag:      return "Trovato nei tag"
         case .keyPoint: return "Trovato nei punti chiave"
+        case .semantic: return "Corrisponde per significato"
         }
     }
 }
@@ -212,9 +285,9 @@ func highlighted(_ text: String, term: String) -> AttributedString {
 struct ResultCard: View {
     let note: Note
     let term: String
+    let match: SearchMatch
 
     private var category: Category { Category.from(note.category) }
-    private var match: SearchMatch { SearchMatch.find(in: note, term: term) }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -264,6 +337,14 @@ struct ResultCard: View {
                 }
             case .title:
                 EmptyView()
+            case .semantic:
+                if let point = note.summaryPoints.first {
+                    Text("«\(point)»")
+                        .font(.body(13.5))
+                        .foregroundStyle(Color.ink)
+                        .lineLimit(3)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
         }
         .padding(EdgeInsets(top: 15, leading: 16, bottom: 15, trailing: 16))
