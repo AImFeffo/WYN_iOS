@@ -20,15 +20,15 @@
 - **Creazione nota:** l'embedding è *best effort*. Se Jina fallisce la nota viene salvata con `embedding = null` e non compare nei risultati semantici. Mai bloccare il salvataggio.
 - **Risultati:** lista unica ibrida. Prima i match testuali (ordine e card attuali), poi le note per significato non già presenti, in ordine di somiglianza. Top 10, soglia minima di similarità iniziale 0.4 (da tarare nel Task 6).
 - **Fallback:** se `search-notes` fallisce o manca la rete, la lista mostra solo i risultati testuali e l'etichetta a destra dice «Solo corrispondenza testuale». Nessun errore bloccante.
-- **Backfill:** script Deno una tantum per le note esistenti (7 righe al 2026-09-15).
+- **Backfill:** *pigro*, dentro `search-notes`. Prima di cercare, le note dell'utente senza embedding (precedenti alla feature, o con embedding fallito alla creazione) vengono embeddate in un'unica chiamata batch a Jina e aggiornate sotto RLS. Copre tutti gli utenti (27 note di 4 utenti al 2026-09-15) senza service-role key né chiavi locali. Il Task 4 originale (script locale) è **sostituito** da questo (ruling del 2026-09-15).
 - **Indice vettoriale:** nessuno per ora (poche centinaia di note per utente al massimo). Da aggiungere HNSW solo se la latenza di `match_notes` supera i 100 ms.
 
 ---
 
 ## Global Constraints (validi per ogni task)
 
-- **Nessuna chiave segreta nel bundle iOS.** `JINA_API_KEY` (già presente) vive solo nei secret delle Edge Functions; **nessun secret nuovo**. La service-role key si usa solo nello script di backfill, passata via env, mai committata.
-- **Stop-and-ask prima di:** deploy delle Edge Functions, applicazione della migrazione sul progetto remoto, esecuzione del backfill. L'utente conferma ogni volta.
+- **Nessuna chiave segreta nel bundle iOS.** `JINA_API_KEY` (già presente) vive solo nei secret delle Edge Functions; **nessun secret nuovo**. Nessuna chiave locale: anche il backfill gira nelle Edge Functions.
+- **Deploy e migrazione** li esegue chi implementa (norma già stabilita nel progetto: la CLI Supabase è loggata, i secret li gestisce l'utente). Migrazione additiva e reversibile.
 - **Comportamenti invariati** (`features.md` §5): debounce 400 ms + autofocus, filtro testuale su title / sourceName / tags / summaryPoints con la stessa precedenza, navigazione al dettaglio, tutto il resto dell'app. Share Extension, `ProcessingService`, `FeedStore`, `Note`, `AuthViewModel` **non si toccano**.
 - **Testi UI in italiano**, riportati verbatim nei task.
 - **Nessuna nuova dipendenza SPM.** Unica dipendenza: `supabase-swift`.
@@ -84,13 +84,12 @@ export TOKEN="$(curl -s "$SB_URL/auth/v1/token?grant_type=password" \
 | File | Azione | Responsabilità |
 |---|---|---|
 | `supabase/migrations/20260915120000_notes_embedding.sql` | crea | colonna `embedding`, funzione `match_notes` |
-| `supabase/functions/_shared/wyn.ts` | modifica | `embedText` (Jina), `noteEmbeddingText`, `embedNoteOrNull`, `userClient`, `ERR.searchFailed`, `NoteInsert.embedding` |
+| `supabase/functions/_shared/wyn.ts` | modifica | `embedTexts` / `embedText` (Jina), `noteEmbeddingText`, `embedNoteOrNull`, `userClient`, `ERR.searchFailed`, `NoteInsert.embedding` |
 | `supabase/functions/_shared/wyn_test.ts` | crea | test `deno test` di `noteEmbeddingText` |
 | `supabase/functions/process-link/index.ts` | modifica | calcola l'embedding prima dell'insert |
 | `supabase/functions/process-screenshot/index.ts` | modifica | idem |
-| `supabase/functions/search-notes/index.ts` | crea | query → embedding → `match_notes` → `{ matches }` |
+| `supabase/functions/search-notes/index.ts` | crea | backfill pigro → query → embedding → `match_notes` → `{ matches }` |
 | `supabase/config.toml` | modifica | `[functions.search-notes] verify_jwt = false` |
-| `supabase/scripts/backfill-embeddings.ts` | crea | embedding delle note esistenti |
 | `WYN/Services/NotesService.swift` | modifica | colonne esplicite (senza `embedding`), `semanticMatches(query:)` |
 | `WYN/Features/Search/SearchView.swift` | modifica | ricerca ibrida, stati, copy, `SearchMatch.semantic`, `ResultCard(match:)` |
 | `features.md`, `tasks/todo.md` | modifica | documentazione |
@@ -176,7 +175,8 @@ git commit -m "db: colonna notes.embedding (vector 512) e funzione match_notes"
 - Produces (in `wyn.ts`):
   - `export const JINA_EMBEDDING_MODEL = "jina-embeddings-v5-text-small"`, `export const EMBEDDING_DIM = 512`
   - `export function noteEmbeddingText(title: string, summaryPoints: string[]): string`
-  - `export async function embedText(text: string, kind: "document" | "query"): Promise<number[]>` (lancia `Error` se Jina fallisce)
+  - `export async function embedTexts(texts: string[], kind: "document" | "query"): Promise<number[][]>` (una chiamata batch; lancia `Error` se Jina fallisce o restituisce un numero diverso di vettori)
+  - `export async function embedText(text: string, kind: "document" | "query"): Promise<number[]>` (wrapper su `embedTexts` per un singolo testo)
   - `export async function embedNoteOrNull(title: string, summaryPoints: string[]): Promise<number[] | null>`
   - `export function userClient(req: Request): SupabaseClient` (client con il JWT dell'utente, usato anche da `verifyUser`)
   - `ERR.searchFailed = "Non siamo riusciti a cercare per significato."`
@@ -254,12 +254,13 @@ export function noteEmbeddingText(title: string, summaryPoints: string[]): strin
     .join("\n");
 }
 
-// Embedding di un testo con Jina. kind: "document" per le note (task retrieval.passage),
+// Embedding batch con Jina. kind: "document" per le note (task retrieval.passage),
 // "query" per la ricerca (task retrieval.query). Vettori L2-normalizzati (default Jina).
-export async function embedText(
-  text: string,
+// Ritorna un vettore per testo, nello stesso ordine.
+export async function embedTexts(
+  texts: string[],
   kind: "document" | "query",
-): Promise<number[]> {
+): Promise<number[][]> {
   const res = await fetch("https://api.jina.ai/v1/embeddings", {
     method: "POST",
     headers: {
@@ -268,18 +269,35 @@ export async function embedText(
     },
     body: JSON.stringify({
       model: JINA_EMBEDDING_MODEL,
-      input: [text],
+      input: texts,
       task: kind === "query" ? "retrieval.query" : "retrieval.passage",
       dimensions: EMBEDDING_DIM,
     }),
   });
   if (!res.ok) throw new Error(`jina embeddings: HTTP ${res.status}`);
   const data = await res.json();
-  const embedding = data?.data?.[0]?.embedding;
-  if (!Array.isArray(embedding) || embedding.length !== EMBEDDING_DIM) {
+  const items = Array.isArray(data?.data) ? data.data : [];
+  if (items.length !== texts.length) {
     throw new Error("jina embeddings: risposta non valida");
   }
-  return embedding as number[];
+  // Jina restituisce `index` per ogni elemento: riordina per sicurezza.
+  const vectors: number[][] = new Array(texts.length);
+  for (const item of items) {
+    const v = item?.embedding;
+    if (!Array.isArray(v) || v.length !== EMBEDDING_DIM || typeof item.index !== "number") {
+      throw new Error("jina embeddings: risposta non valida");
+    }
+    vectors[item.index] = v as number[];
+  }
+  return vectors;
+}
+
+// Embedding di un singolo testo.
+export async function embedText(
+  text: string,
+  kind: "document" | "query",
+): Promise<number[]> {
+  return (await embedTexts([text], kind))[0];
 }
 
 // Embedding "best effort" di una nota: null se Jina fallisce.
@@ -390,22 +408,26 @@ git commit -m "functions: embedding Jina alla creazione della nota (best effort)
 - Modify: `supabase/config.toml`
 
 **Interfaces:**
-- Consumes: `embedText` (Jina), `userClient`, `verifyUser`, `ERR`, `CORS_HEADERS`, `jsonResponse`, `errorResponse` da `wyn.ts`; funzione SQL `match_notes` (Task 1).
-- Produces: `POST /functions/v1/search-notes` con body `{ "query": string }` → `200 { "matches": [{ "id": uuid, "similarity": number }] }` ordinati per similarità decrescente; `400 { error }` se query vuota; `401` senza sessione; `500 { error: ERR.searchFailed }` se Jina o il DB falliscono.
+- Consumes: `embedText`, `embedTexts`, `noteEmbeddingText`, `userClient`, `verifyUser`, `ERR`, `CORS_HEADERS`, `jsonResponse`, `errorResponse` da `wyn.ts`; funzione SQL `match_notes` (Task 1).
+- Produces: `POST /functions/v1/search-notes` con body `{ "query": string }` → `200 { "matches": [{ "id": uuid, "similarity": number }] }` ordinati per similarità decrescente; `400 { error }` se query vuota; `401` senza sessione; `500 { error: ERR.searchFailed }` se Jina o il DB falliscono. **Effetto collaterale:** prima della ricerca embedda (batch, max 50 per chiamata) le note dell'utente con `embedding is null` e le aggiorna; un fallimento del backfill viene loggato e non blocca la ricerca.
 
 - [ ] **Step 1: Scrivere la funzione**
 
 ```ts
 // Edge Function: search-notes
-// { query } → embedding Jina (task retrieval.query) → match_notes con il client
-// utente (RLS) → { matches: [{ id, similarity }] }. Solo gli id: l'app ha già le note.
+// { query } → backfill pigro delle note senza embedding → embedding Jina della
+// query (task retrieval.query) → match_notes con il client utente (RLS)
+// → { matches: [{ id, similarity }] }. Solo gli id: l'app ha già le note.
 
+import type { SupabaseClient } from "jsr:@supabase/supabase-js@2";
 import {
   CORS_HEADERS,
   embedText,
+  embedTexts,
   ERR,
   errorResponse,
   jsonResponse,
+  noteEmbeddingText,
   userClient,
   verifyUser,
 } from "../_shared/wyn.ts";
@@ -413,6 +435,29 @@ import {
 const MAX_QUERY = 200;
 const MATCH_COUNT = 10;
 const MIN_SIMILARITY = 0.4; // da tarare sulle note reali (Task 6)
+const BACKFILL_LIMIT = 50;
+
+// Embedda le note dell'utente che non hanno ancora un embedding (precedenti alla
+// feature, o con embedding fallito alla creazione). Una sola chiamata batch a Jina.
+// Gira sotto RLS: il client utente può aggiornare solo le proprie note.
+async function backfillMissingEmbeddings(db: SupabaseClient): Promise<void> {
+  const { data: missing, error } = await db
+    .from("notes")
+    .select("id,title,summary_points")
+    .is("embedding", null)
+    .limit(BACKFILL_LIMIT);
+  if (error || !missing || missing.length === 0) return;
+
+  const vectors = await embedTexts(
+    missing.map((n) => noteEmbeddingText(n.title, n.summary_points)),
+    "document",
+  );
+  await Promise.all(
+    missing.map((n, i) =>
+      db.from("notes").update({ embedding: vectors[i] }).eq("id", n.id)
+    ),
+  );
+}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -435,12 +480,21 @@ Deno.serve(async (req) => {
     : "";
   if (!query) return errorResponse(ERR.invalidBody, 400);
 
+  const db = userClient(req);
+
+  // 3. Backfill pigro: non deve mai bloccare la ricerca.
   try {
-    // 3. Embedding della query.
+    await backfillMissingEmbeddings(db);
+  } catch (e) {
+    console.error("backfill embedding:", e);
+  }
+
+  try {
+    // 4. Embedding della query.
     const embedding = await embedText(query, "query");
 
-    // 4. Similarità sotto RLS (client con il JWT dell'utente).
-    const { data, error } = await userClient(req).rpc("match_notes", {
+    // 5. Similarità sotto RLS (client con il JWT dell'utente).
+    const { data, error } = await db.rpc("match_notes", {
       query_embedding: embedding,
       match_count: MATCH_COUNT,
       min_similarity: MIN_SIMILARITY,
@@ -493,6 +547,13 @@ curl -s -o /dev/null -w "%{http_code}\n" "$SB_URL/functions/v1/search-notes" \
 ```
 Atteso: `{"matches":[{"id":"…","similarity":0.…}]}` con l'id della nota sul pricing in cima; `400`; `401`.
 
+Backfill pigro: dopo la prima chiamata, con `execute_sql`:
+```sql
+select count(*) filter (where embedding is null) as senza, count(*) as totale
+  from public.notes where user_id = (select id from auth.users where email = 'feffo-demo@wyn.app');
+```
+Atteso: `senza = 0`. Le note degli altri utenti si completano alla loro prima ricerca.
+
 - [ ] **Step 6: Commit**
 
 ```bash
@@ -502,79 +563,11 @@ git commit -m "functions: search-notes (embedding query + match_notes sotto RLS)
 
 ---
 
-### Task 4: Backfill delle note esistenti
+### Task 4: Backfill delle note esistenti — SOSTITUITO
 
-**Files:**
-- Create: `supabase/scripts/backfill-embeddings.ts`
+**Decisione (2026-09-15):** le 27 note esistenti appartengono a 4 utenti; uno script locale avrebbe richiesto service-role key e chiave Jina fuori dai secret. Il backfill è ora *pigro* dentro `search-notes` (Task 3, `backfillMissingEmbeddings`): ogni utente completa le proprie note alla prima ricerca, sotto RLS, senza chiavi locali. Nessun file da creare, nessun passo da eseguire.
 
-**Interfaces:**
-- Consumes: `serviceClient`, `embedNoteOrNull` da `wyn.ts`.
-- Produces: tutte le righe di `notes` con `embedding is not null` (salvo fallimenti Jina, loggati).
-
-- [ ] **Step 1: Scrivere lo script**
-
-```ts
-// Backfill una tantum: calcola l'embedding delle note che non ce l'hanno.
-// Uso (dalla root del repo, chiavi passate SOLO via env, mai nel repo):
-//   SUPABASE_URL=https://odplsmpadzhyhkdoqrne.supabase.co \
-//   SUPABASE_SERVICE_ROLE_KEY=... JINA_API_KEY=... \
-//   deno run --allow-net --allow-env supabase/scripts/backfill-embeddings.ts
-
-import { embedNoteOrNull, serviceClient } from "../functions/_shared/wyn.ts";
-
-const db = serviceClient();
-const { data: notes, error } = await db
-  .from("notes")
-  .select("id,title,summary_points")
-  .is("embedding", null);
-if (error) throw error;
-
-console.log(`Note senza embedding: ${notes.length}`);
-let ok = 0;
-for (const n of notes) {
-  const embedding = await embedNoteOrNull(n.title, n.summary_points);
-  if (!embedding) {
-    console.error(`saltata ${n.id} (${n.title})`);
-    continue;
-  }
-  const { error: upErr } = await db.from("notes").update({ embedding }).eq("id", n.id);
-  if (upErr) {
-    console.error(`errore ${n.id}: ${upErr.message}`);
-    continue;
-  }
-  ok++;
-  console.log(`ok ${n.id} — ${n.title}`);
-}
-console.log(`Completato: ${ok}/${notes.length}`);
-```
-
-- [ ] **Step 2: STOP — chiedere all'utente service-role key e Jina key per l'esecuzione**
-
-Le chiavi si passano inline nel comando dello Step 3 e non si salvano da nessuna parte.
-
-- [ ] **Step 3: Eseguire**
-
-```bash
-SUPABASE_URL=https://odplsmpadzhyhkdoqrne.supabase.co \
-SUPABASE_SERVICE_ROLE_KEY=<service-role> JINA_API_KEY=<jina> \
-deno run --allow-net --allow-env supabase/scripts/backfill-embeddings.ts
-```
-Atteso: `Completato: N/N`.
-
-- [ ] **Step 4: Verificare**
-
-Con `execute_sql`:
-```sql
-select count(*) filter (where embedding is null) as senza, count(*) as totale from public.notes;
-```
-Atteso: `senza = 0`.
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add supabase/scripts/backfill-embeddings.ts
-git commit -m "functions: script di backfill embedding per le note esistenti"
-```
+- [x] Nessuna azione (assorbito dal Task 3).
 
 ---
 
@@ -850,14 +843,14 @@ git commit -m "ui: cerca — risultati ibridi testo + significato, stati e copy"
 ### Task 7: Documentazione e chiusura
 
 **Files:**
-- Modify: `features.md` (§5.3, §6.4, §9.3, §10, «Idee v2»)
+- Modify: `features.md` (§3, §5.3, §6.1, §6.2, §6.4, §9.3, §10, «Idee v2»)
 - Modify: `tasks/todo.md` (sezione review)
 - Run: `graphify update .`
 
 - [ ] **Step 1: `features.md`**
 
 - §5.3: placeholder «Cerca per concetto, non per titolo…»; descrivere la ricerca ibrida (filtro testuale client-side invariato + `search-notes` con embedding Jina `jina-embeddings-v5-text-small` 512d e `match_notes` pgvector; top 10, soglia scelta nel Task 6; fallback «Solo corrispondenza testuale»).
-- §6.4: aggiungere `POST search-notes { query } → { matches: [{ id, similarity }] }`.
+- §6.4: aggiungere `POST search-notes { query } → { matches: [{ id, similarity }] }` (con backfill pigro delle note senza embedding).
 - §6.1 / §6.2: aggiungere il passo «embedding best effort (null se Jina fallisce)».
 - §3: nuova colonna `embedding | vector(512), nullable | titolo + punti chiave, calcolato alla creazione`.
 - §2 / §8: Jina AI usato anche per gli embedding (stessa `JINA_API_KEY`), nessuna chiave nuova.
@@ -879,7 +872,7 @@ git commit -m "docs: ricerca semantica — features.md e review"
 
 ## §3 — Rischi e note per chi esegue
 
-- **Ordine obbligato:** Task 1 → 2 → 3 → 4 lato backend; Task 5 → 6 lato iOS possono partire solo dopo il Task 3 deployato (altrimenti la UI mostra sempre «Solo corrispondenza testuale»).
+- **Ordine obbligato:** Task 1 → 2 → 3 lato backend (Task 4 assorbito dal 3); Task 5 → 6 lato iOS possono partire solo dopo il Task 3 deployato (altrimenti la UI mostra sempre «Solo corrispondenza testuale»).
 - **Risposte in ritardo:** `runSemanticSearch` cancella il task precedente a ogni nuovo termine e ignora i risultati se cancellato. Non usare i risultati di una query vecchia.
 - **`select("*")` e la colonna vettoriale:** il Task 5 va fatto anche se non si volesse la UI, altrimenti ogni caricamento del feed scarica gli embedding.
 - **Share Extension:** nessuna modifica. Le note create da lì passano dalle stesse Edge Functions e ricevono l'embedding.
