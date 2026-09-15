@@ -18,7 +18,7 @@ import {
 
 const MAX_QUERY = 200;
 const MATCH_COUNT = 10;
-const MIN_SIMILARITY = 0.4; // da tarare sulle note reali (Task 6)
+const MIN_SIMILARITY = 0.4; // tarata sulle note demo il 2026-09-15
 const BACKFILL_LIMIT = 50;
 
 // Embedda le note dell'utente che non hanno ancora un embedding (precedenti alla
