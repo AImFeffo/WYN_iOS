@@ -27,7 +27,7 @@ Lingua dell'interfaccia e dei contenuti generati: **italiano** (l'AI risponde se
 | Tema chiaro/scuro | **next-themes** (`attribute="class"`, `defaultTheme="system"`) |
 | Backend / DB / Auth / Storage | **Supabase** (Postgres + Auth + Storage) |
 | AI (analisi contenuti) | **Anthropic Claude** (`@anthropic-ai/sdk`), modello `claude-sonnet-4-6` |
-| Estrazione testo da URL | **Jina AI Reader** (`https://r.jina.ai/`) |
+| Estrazione testo da URL / embeddings | **Jina AI**: Reader (`https://r.jina.ai/`) per il testo, Embeddings (`jina-embeddings-v5-text-small`, 512d) per la ricerca semantica |
 | Elaborazione immagini | **sharp** (resize/compressione lato server) |
 | Analytics performance | **@vercel/speed-insights** |
 | Font | Google Fonts: **Newsreader** (titoli), **Geist** (testo), **Geist Mono** (etichette) |
@@ -76,6 +76,7 @@ public/manifest.json               → manifest PWA
 | `thumbnail_url` | text, nullable | previsto ma non popolato attualmente |
 | `read_time_label` | text, nullable | es. "4 min", solo per articoli |
 | `created_at` | timestamptz | ordinamento feed (desc) |
+| `embedding` | vector(512), nullable | titolo + punti chiave, calcolato alla creazione (best effort: null se Jina fallisce) |
 
 ### Categorie (fisse, 7)
 `Tech · Salute · Business · Cucina · Design · Finanza · Altro`
@@ -148,6 +149,7 @@ Sulla tabella `notes` sono attive **4 policy** (SELECT / INSERT / UPDATE / DELET
 - Ricerca **case-insensitive** su: `title`, `source_name`, `tags`, `summary_points` (match "contiene").
   - Nota: la ricerca è **client-side sul set di note dell'utente** (recupera tutte le note e filtra in memoria). Non è ricerca full-text DB né semantica.
 - Risultati come lista compatta (`ResultCard`); stato "N risultati", loading e stato vuoto dedicati.
+- **App iOS — ricerca ibrida**: allo stesso filtro testuale client-side si affianca una ricerca semantica. Con almeno 3 caratteri (dopo il debounce) l'app chiama la Edge Function `search-notes`, che genera l'embedding della query con Jina (`jina-embeddings-v5-text-small`, 512d, `task: retrieval.query`) e la confronta via pgvector (`match_notes`, similarità coseno, soglia 0.40, top 10) con gli embedding delle note (`task: retrieval.passage` su titolo + punti chiave). La lista mostra prima i match testuali (invariati, evidenziati), poi le note trovate per significato con etichetta «Corrisponde per significato». Stati: «Corrispondenza testuale» (idle), «cerco per significato…» (loading), «Testo e significato» (fatto), «Solo corrispondenza testuale» (fallback su errore di rete/server, nessun blocco); «Nessun risultato» solo se entrambi gli esiti sono vuoti.
 
 ### 5.4 Categorie (`/categorie`)
 - Griglia 2 colonne con una card per categoria: icona colorata + nome + conteggio note.
@@ -179,8 +181,9 @@ Sulla tabella `notes` sono attive **4 policy** (SELECT / INSERT / UPDATE / DELET
 3. Valida che sia un URL `http`/`https`.
 4. **Estrae il testo** con **Jina AI Reader**: `GET https://r.jina.ai/<url>` con header `Authorization: Bearer <JINA_API_KEY>`. Testo troncato a 15.000 caratteri; `sourceName` = hostname senza `www.`. Errore se il contenuto è < 100 caratteri.
 5. **Analizza con Claude** (`analyzeArticle`): system prompt che impone un output **solo JSON** con `title`, `summary_points` (3–5), `category` (una delle 7), `tags` (3–5), `read_time_label`. Se presente, l'hint forza almeno un punto chiave su quell'aspetto.
-6. **Salva** la nota su Supabase con service-role key (`source_type: "article"`).
-7. Ritorna `{ id }`. Il client fa `router.refresh()` per aggiornare il feed.
+6. **Embedding best effort**: calcola l'embedding (Jina, titolo + punti chiave) da includere nell'insert; se Jina fallisce la nota viene salvata comunque con `embedding = null`.
+7. **Salva** la nota su Supabase con service-role key (`source_type: "article"`).
+8. Ritorna `{ id }`. Il client fa `router.refresh()` per aggiornare il feed.
 
 ### 6.2 Da screenshot → nota (`POST /api/process-screenshot`)
 1. Verifica utente autenticato.
@@ -188,9 +191,10 @@ Sulla tabella `notes` sono attive **4 policy** (SELECT / INSERT / UPDATE / DELET
 3. Valida tipo (`image/jpeg|png|webp`) e dimensione (max 20 MB).
 4. **Resize con sharp** (lato max 1568px, `fit: inside`, no enlargement) → JPEG q. 85.
 5. **Analizza con Claude Vision** (`analyzeScreenshot`): immagine in base64 + prompt che chiede lo stesso JSON degli articoli **senza** `read_time_label`. (L'analisi avviene **prima** dell'upload, per evitare file orfani se Claude fallisce.)
-6. **Upload** su Storage bucket `screenshots` (path `user_id/uuid.jpg`).
-7. **Salva** la nota (`source_type: "screenshot"`, `image_paths: [path]`).
-8. Ritorna `{ id }`.
+6. **Embedding best effort**: calcola l'embedding (Jina, titolo + punti chiave); se Jina fallisce la nota viene salvata comunque con `embedding = null`.
+7. **Upload** su Storage bucket `screenshots` (path `user_id/uuid.jpg`).
+8. **Salva** la nota (`source_type: "screenshot"`, `image_paths: [path]`).
+9. Ritorna `{ id }`.
 
 ### 6.3 Robustezza del parsing AI
 Claude a volte "avvolge" il JSON in testo/markdown: il codice tenta `JSON.parse` diretto e, se fallisce, estrae il primo blocco `{...}` con regex. Valida che `title` e `summary_points` esistano, altrimenti solleva errore. **Da replicare identico** in una versione nativa.
@@ -200,6 +204,7 @@ Claude a volte "avvolge" il JSON in testo/markdown: il codice tenta `JSON.parse`
 - `PATCH /api/notes/[id]` con `{ tags: string[] }` → normalizza (trim, minuscolo, ≤40 char, non vuoti) e aggiorna. Rispetta RLS (usa client utente, non service-role).
 - `DELETE /api/notes/[id]` → elimina la nota (solo se dell'utente).
 - `GET /api/export?format=json|markdown` → download di tutte le note dell'utente.
+- **App iOS** — `POST search-notes { query } → { matches: [{ id, similarity }] }` (Edge Function): query troncata a 200 caratteri, esegue `match_notes` (pgvector, soglia 0.40, top 10) con il JWT dell'utente (RLS). Prima della ricerca esegue un **backfill pigro**: le note dell'utente senza embedding (max 50 per chiamata) vengono embeddate in batch e aggiornate; un fallimento del backfill viene loggato e non blocca la ricerca.
 
 ---
 
@@ -245,7 +250,7 @@ Necessarie per far girare l'app (nomi da `.env.local`):
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | chiave anon Supabase (pubblica) |
 | `SUPABASE_SERVICE_ROLE_KEY` | chiave service-role (**segreta**, solo server: insert/upload che bypassano RLS) |
 | `ANTHROPIC_API_KEY` | chiave API Claude |
-| `JINA_API_KEY` | chiave API Jina Reader |
+| `JINA_API_KEY` | chiave API Jina, usata sia per il Reader (estrazione testo) sia per gli Embeddings (ricerca semantica) |
 
 > Le chiavi `SUPABASE_SERVICE_ROLE_KEY`, `ANTHROPIC_API_KEY`, `JINA_API_KEY` **non devono mai finire sul client**. In una versione nativa iOS questo è critico (vedi §9): non vanno incluse nell'app, ma tenute su un backend.
 
@@ -273,7 +278,7 @@ In entrambi i casi l'app iOS parla **solo** con Supabase (auth, lettura note, st
 
 ### 9.3 Cosa fa direttamente l'app iOS
 - **Auth**: `supabase-swift` → `signIn`/`signUp`/`signOut` email-password; sessione persistita in modo sicuro.
-- **Feed / dettaglio / categorie / ricerca**: query dirette alla tabella `notes` via SDK (RLS garantisce l'isolamento per utente). La ricerca può restare client-side come oggi, oppure passare a full-text Postgres.
+- **Feed / dettaglio / categorie / ricerca**: query dirette alla tabella `notes` via SDK (RLS garantisce l'isolamento per utente). La ricerca è ibrida: filtro testuale client-side (come oggi) più ricerca semantica via Edge Function `search-notes` (pgvector, vedi §5.3/§6.4).
 - **Aggiunta screenshot**: compressione con API native, upload su Storage, chiamata all'endpoint di elaborazione.
 - **Export**: generazione JSON/Markdown lato client e condivisione con il share sheet iOS.
 
@@ -294,7 +299,7 @@ In entrambi i casi l'app iOS parla **solo** con Supabase (auth, lettura note, st
 
 ## 10. Limitazioni note e stato
 
-- **Ricerca**: solo testuale in-memory (title, source_name, tags, summary_points). Nessuna ricerca semantica/vettoriale.
+- **Ricerca**: web, solo testuale in-memory (title, source_name, tags, summary_points). App iOS: ibrida testo + semantica (pgvector, vedi §5.3); la qualità dei risultati semantici dipende dall'embedding — es. sulle note demo «come risparmiare» non recupera la nota sull'interesse composto (similarità 0.25, sotto soglia).
 - **Condivisione**: bottone "Condividi" nel dettaglio e `share_target` PWA **non implementati**.
 - **"Scatta foto"**: disabilitato nella PWA.
 - **Elaborazione sincrona**: l'utente attende il completamento AI (nessun job in background lato server).
@@ -302,7 +307,7 @@ In entrambi i casi l'app iOS parla **solo** con Supabase (auth, lettura note, st
 - **Prompt/output solo in italiano.**
 
 ### Idee v2 (non implementate)
-Ricerca semantica (pgvector + embeddings), elaborazione asincrona con polling/realtime, swipe-to-delete nel feed, onboarding iniziale, dominio personalizzato.
+Elaborazione asincrona con polling/realtime, swipe-to-delete nel feed, onboarding iniziale, dominio personalizzato.
 
 ---
 

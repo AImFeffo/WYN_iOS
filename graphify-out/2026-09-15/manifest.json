@@ -155,8 +155,8 @@
     "semantic_hash": ""
   },
   "WYN/Features/Search/SearchView.swift": {
-    "mtime": 1789495134.7760499,
-    "ast_hash": "17c1048c51827cea807f013a724e754a",
+    "mtime": 1789211683.4222515,
+    "ast_hash": "0d8cb6c47820ec7fc32beb5b3b0848d0",
     "semantic_hash": ""
   },
   "WYN/Models/Category.swift": {
@@ -235,9 +235,9 @@
     "semantic_hash": "b764f885498378ad7c1e5e94ccfdf171"
   },
   "WYN/Services/NotesService.swift": {
-    "mtime": 1789494527.6151628,
-    "ast_hash": "a4f9964e03caa049f466effa21cc7711",
-    "semantic_hash": ""
+    "mtime": 1783856104.2392275,
+    "ast_hash": "cbce76313df1804e81648ac110ff8f90",
+    "semantic_hash": "cbce76313df1804e81648ac110ff8f90"
   },
   "WYN/Services/ProcessingService.swift": {
     "mtime": 1783857458.4048855,
@@ -270,19 +270,19 @@
     "semantic_hash": "778e82879095141842738580cc2896c1"
   },
   "supabase/functions/_shared/wyn.ts": {
-    "mtime": 1789493773.9205348,
-    "ast_hash": "5ca849cf6b9cc2d19782f09be8d78a4c",
-    "semantic_hash": ""
+    "mtime": 1783853095.0547569,
+    "ast_hash": "babf56b6a820119ec4bd4bdc1a2a799f",
+    "semantic_hash": "babf56b6a820119ec4bd4bdc1a2a799f"
   },
   "supabase/functions/process-link/index.ts": {
-    "mtime": 1789493788.7478845,
-    "ast_hash": "f5e7c2f4a58dbaedd19983b036d92a7f",
-    "semantic_hash": ""
+    "mtime": 1783853117.388842,
+    "ast_hash": "2862d70756293672bfb772e866a9b018",
+    "semantic_hash": "2862d70756293672bfb772e866a9b018"
   },
   "supabase/functions/process-screenshot/index.ts": {
-    "mtime": 1789493798.7547219,
-    "ast_hash": "4882107709fa76c03cf4b7e6c30b35c6",
-    "semantic_hash": ""
+    "mtime": 1783853142.8298304,
+    "ast_hash": "3ae6bc1842a0c0c6783f94f5c1f997e7",
+    "semantic_hash": "3ae6bc1842a0c0c6783f94f5c1f997e7"
   },
   "WYN/Resources/Assets.xcassets/catAltro.colorset/Contents.json": {
     "mtime": 1789207945.1128106,
@@ -334,6 +334,91 @@
     "ast_hash": "5c88465417e3462415bbaa407f1443be",
     "semantic_hash": ""
   },
+  ".superpowers/sdd/UI_REDESIGN_PLAN/constraints.md": {
+    "mtime": 1789207401.3653655,
+    "ast_hash": "89ae4e1795e6c8f0aa274b607d5e0282",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/UI_REDESIGN_PLAN/progress.md": {
+    "mtime": 1789216243.941824,
+    "ast_hash": "02c53bdb947a7c4028c798539a522895",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-0-brief.md": {
+    "mtime": 1789207362.220631,
+    "ast_hash": "8aad93f096dc14bbe55a93025f7b537e",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-0-report.md": {
+    "mtime": 1789207760.8473406,
+    "ast_hash": "64803ece8184685beee7f0144a5a4798",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-1-brief.md": {
+    "mtime": 1789207362.253272,
+    "ast_hash": "5a99644d872287648e55a5e54ee957de",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-2-brief.md": {
+    "mtime": 1789207393.2101207,
+    "ast_hash": "beee4ea597a3cafe4168eac07f4190cb",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-3a-brief.md": {
+    "mtime": 1789207393.2362301,
+    "ast_hash": "754c46416a934b35b76098ef727c8b8a",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-3b-brief.md": {
+    "mtime": 1789207393.261827,
+    "ast_hash": "cde479df4c60b47a7b4e073d000d483e",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-3c-brief.md": {
+    "mtime": 1789207393.2872746,
+    "ast_hash": "684835074fc7a0beda4c9cf3fcd04c49",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-3d-brief.md": {
+    "mtime": 1789207393.3123095,
+    "ast_hash": "6883b0b5b344ad9fd26707236ce977e6",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-4-brief.md": {
+    "mtime": 1789207393.3369052,
+    "ast_hash": "4bbbd35618f545ca94bbbf5e4fef5d4f",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-5-brief.md": {
+    "mtime": 1789207393.3621361,
+    "ast_hash": "f15719e648fc57ed9e69c6acedb64c1e",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-6-brief.md": {
+    "mtime": 1789207393.388368,
+    "ast_hash": "2a9e06f3c51db1f07e1d694d2e515adf",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-7-brief.md": {
+    "mtime": 1789207393.4135816,
+    "ast_hash": "9c566aaf303f586ec2a19b061a637f98",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-8-brief.md": {
+    "mtime": 1789207393.4391265,
+    "ast_hash": "66565d348de7b57a15ffb8bd3f85c245",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-9-brief.md": {
+    "mtime": 1789207393.4640107,
+    "ast_hash": "43bf3ca638c189577c442e9b93434941",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/UI_REDESIGN_PLAN/verify-toolkit.md": {
+    "mtime": 1789209575.5510767,
+    "ast_hash": "5f4d07678e1c9c382a620c4c47b4ab68",
+    "semantic_hash": ""
+  },
   "CLAUDE.md": {
     "mtime": 1783970962.9237843,
     "ast_hash": "486f3a228f7b1bf31c174772380358fc",
@@ -345,8 +430,8 @@
     "semantic_hash": ""
   },
   "features.md": {
-    "mtime": 1789495854.1620982,
-    "ast_hash": "8a48bdf3c29636bfb1ebe05f0efd977a",
+    "mtime": 1783539395.9594893,
+    "ast_hash": "bad55c9f0b737b3c82fae123d7582ef2",
     "semantic_hash": ""
   },
   "project.yml": {
@@ -365,8 +450,8 @@
     "semantic_hash": ""
   },
   "tasks/todo.md": {
-    "mtime": 1789495874.479756,
-    "ast_hash": "fd2d2c97896a355007dde6f83af75954",
+    "mtime": 1789216097.333421,
+    "ast_hash": "6d482eac9b21735ab47d53b749c437ea",
     "semantic_hash": ""
   },
   "WYN/Resources/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png": {
@@ -384,94 +469,59 @@
     "ast_hash": "6523ce7b73761ea8cc2b1e2cde9fa620",
     "semantic_hash": ""
   },
-  "supabase/functions/_shared/wyn_test.ts": {
-    "mtime": 1789493739.9600546,
-    "ast_hash": "53da8801df995b4b54a05556e3361413",
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-1-report.md": {
+    "mtime": 1789208336.510608,
+    "ast_hash": "bc40a5341515eeda20ab4a599f49d232",
     "semantic_hash": ""
   },
-  "supabase/functions/search-notes/index.ts": {
-    "mtime": 1789494884.9050522,
-    "ast_hash": "4210ac80837bb173de122e0ae74eb554",
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-2-report.md": {
+    "mtime": 1789208536.8804307,
+    "ast_hash": "30573d365913b0a05c5c6a81cf831a9f",
     "semantic_hash": ""
   },
-  "supabase/migrations/20260915120000_notes_embedding.sql": {
-    "mtime": 1789493508.0356438,
-    "ast_hash": "edc92d28a82dfd6e29a84d483ee9617f",
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-3a-report.md": {
+    "mtime": 1789209192.564233,
+    "ast_hash": "83cbb002e2018a84f1471b3f342af429",
     "semantic_hash": ""
   },
-  ".superpowers/sdd/SEMANTIC_SEARCH_PLAN/progress.md": {
-    "mtime": 1789495738.0954216,
-    "ast_hash": "0cc96084c8f6beae13e44904999409ec",
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-3b-report.md": {
+    "mtime": 1789209558.83978,
+    "ast_hash": "f6a38a89c6f0a98ce9354f1e103cc4bd",
     "semantic_hash": ""
   },
-  ".superpowers/sdd/SEMANTIC_SEARCH_PLAN/task-1-brief.md": {
-    "mtime": 1789493086.6463969,
-    "ast_hash": "7e9c92cbf82c91c4426d4f2a5c9c7c93",
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-3c-report.md": {
+    "mtime": 1789210057.0778778,
+    "ast_hash": "87801354bd92de98ee631007dd63c931",
     "semantic_hash": ""
   },
-  ".superpowers/sdd/SEMANTIC_SEARCH_PLAN/task-1-report.md": {
-    "mtime": 1789493597.3933048,
-    "ast_hash": "b7a98c5a3d551a72178d1810c3ea3b7f",
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-3d-report.md": {
+    "mtime": 1789210940.2846112,
+    "ast_hash": "0c1b0336a983c4cb2ed1ee75d4a55560",
     "semantic_hash": ""
   },
-  ".superpowers/sdd/SEMANTIC_SEARCH_PLAN/task-2-brief.md": {
-    "mtime": 1789493449.1196141,
-    "ast_hash": "87b1da42ebc0d5017a5ff4e56e65a3b7",
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-4-report.md": {
+    "mtime": 1789211557.5890098,
+    "ast_hash": "3e89970bb87fbfa31afe6c2f83d3451e",
     "semantic_hash": ""
   },
-  ".superpowers/sdd/SEMANTIC_SEARCH_PLAN/task-2-report.md": {
-    "mtime": 1789493945.5077448,
-    "ast_hash": "3b9d8ef8a77c0ffe307e58c6111eb110",
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-5-report.md": {
+    "mtime": 1789212080.7908113,
+    "ast_hash": "8fae1e9b795f200d3260c69f340f88bd",
     "semantic_hash": ""
   },
-  ".superpowers/sdd/SEMANTIC_SEARCH_PLAN/task-3-brief.md": {
-    "mtime": 1789493449.143478,
-    "ast_hash": "2a96e4c556caf3025c82000ad6cf434a",
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-6-7-report.md": {
+    "mtime": 1789212639.0888114,
+    "ast_hash": "b209e496d03c9017001f3d1c0f7ef855",
     "semantic_hash": ""
   },
-  ".superpowers/sdd/SEMANTIC_SEARCH_PLAN/task-3-report.md": {
-    "mtime": 1789494323.0076494,
-    "ast_hash": "7aa97e99f5ae71d0ce1c4dcf3aae6157",
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-8-report.md": {
+    "mtime": 1789213492.2526693,
+    "ast_hash": "809564f70765528c8fc87aa9b6cd0d46",
     "semantic_hash": ""
   },
-  ".superpowers/sdd/SEMANTIC_SEARCH_PLAN/task-3b-tuning-report.md": {
-    "mtime": 1789494978.1277666,
-    "ast_hash": "7671ab52873a17059504891efbf29ba2",
-    "semantic_hash": ""
-  },
-  ".superpowers/sdd/SEMANTIC_SEARCH_PLAN/task-4-brief.md": {
-    "mtime": 1789493449.1672728,
-    "ast_hash": "6d70778e2a9959a14b8dc229d79e311c",
-    "semantic_hash": ""
-  },
-  ".superpowers/sdd/SEMANTIC_SEARCH_PLAN/task-5-brief.md": {
-    "mtime": 1789493086.7426348,
-    "ast_hash": "43e7aeec75cc8bc81bcfb62be69a89cb",
-    "semantic_hash": ""
-  },
-  ".superpowers/sdd/SEMANTIC_SEARCH_PLAN/task-5-report.md": {
-    "mtime": 1789494598.7784812,
-    "ast_hash": "25c53464e997a56394429bf803f543a5",
-    "semantic_hash": ""
-  },
-  ".superpowers/sdd/SEMANTIC_SEARCH_PLAN/task-6-brief.md": {
-    "mtime": 1789493086.766614,
-    "ast_hash": "773df988f16477226add9f576fd79aee",
-    "semantic_hash": ""
-  },
-  ".superpowers/sdd/SEMANTIC_SEARCH_PLAN/task-6-report.md": {
-    "mtime": 1789495628.8975306,
-    "ast_hash": "f106028d85f29bb4e6911fda9b2319bf",
-    "semantic_hash": ""
-  },
-  ".superpowers/sdd/SEMANTIC_SEARCH_PLAN/task-7-brief.md": {
-    "mtime": 1789493449.1910803,
-    "ast_hash": "bea3806ea0531e44264e71a6151eb76d",
-    "semantic_hash": ""
-  },
-  "SEMANTIC_SEARCH_PLAN.md": {
-    "mtime": 1789493323.2023451,
-    "ast_hash": "cc8f78f69dc8d140fe2a1cd1916b4467",
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-9-report.md": {
+    "mtime": 1789216182.9748833,
+    "ast_hash": "4dcc6fd54b0838cd47aa793a2e1aea61",
     "semantic_hash": ""
   }
 }
