@@ -4,6 +4,7 @@
 import {
   analyzeArticle,
   CORS_HEADERS,
+  embedNoteOrNull,
   ERR,
   errorResponse,
   insertNote,
@@ -75,6 +76,9 @@ Deno.serve(async (req) => {
     // 5. Analisi con Claude.
     const analysis = await analyzeArticle(text, hint);
 
+    // 5b. Embedding per la ricerca semantica (best effort).
+    const embedding = await embedNoteOrNull(analysis.title, analysis.summary_points);
+
     // 6. Insert con service-role.
     const db = serviceClient();
     const id = await insertNote(db, {
@@ -87,6 +91,7 @@ Deno.serve(async (req) => {
       tags: analysis.tags,
       source_name: sourceName,
       read_time_label: analysis.read_time_label ?? null,
+      embedding,
     });
 
     return jsonResponse({ id });

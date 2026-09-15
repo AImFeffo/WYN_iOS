@@ -7,6 +7,10 @@ import { createClient, type SupabaseClient } from "jsr:@supabase/supabase-js@2";
 // Modello AI usato sia per articoli sia per Vision (come la PWA).
 export const CLAUDE_MODEL = "claude-sonnet-4-6";
 
+// Embedding per la ricerca semantica (Jina AI: stessa chiave del Reader).
+export const JINA_EMBEDDING_MODEL = "jina-embeddings-v5-text-small";
+export const EMBEDDING_DIM = 512;
+
 // Le 7 categorie fisse ammesse.
 export const CATEGORIES = [
   "Tech",
@@ -28,6 +32,7 @@ export const ERR = {
   processing: "Non siamo riusciti a elaborare questo contenuto",
   imageTooLarge: "L'immagine è troppo grande (max 20 MB).",
   saveFailed: "Non siamo riusciti a salvare la nota.",
+  searchFailed: "Non siamo riusciti a cercare per significato.",
 } as const;
 
 export const CORS_HEADERS: Record<string, string> = {
@@ -58,17 +63,19 @@ export function serviceClient(): SupabaseClient {
   );
 }
 
-// Verifica l'utente dal JWT nell'header Authorization. Ritorna l'id utente o null.
-export async function verifyUser(req: Request): Promise<string | null> {
-  const authHeader = req.headers.get("Authorization");
-  if (!authHeader) return null;
-
-  const client = createClient(
+// Client con il JWT dell'utente (header Authorization): tutte le query passano dalla RLS.
+export function userClient(req: Request): SupabaseClient {
+  return createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_ANON_KEY")!,
-    { global: { headers: { Authorization: authHeader } } },
+    { global: { headers: { Authorization: req.headers.get("Authorization") ?? "" } } },
   );
-  const { data, error } = await client.auth.getUser();
+}
+
+// Verifica l'utente dal JWT nell'header Authorization. Ritorna l'id utente o null.
+export async function verifyUser(req: Request): Promise<string | null> {
+  if (!req.headers.get("Authorization")) return null;
+  const { data, error } = await userClient(req).auth.getUser();
   if (error || !data.user) return null;
   return data.user.id;
 }
@@ -206,6 +213,75 @@ export async function analyzeScreenshot(
   return parseClaudeJson(raw);
 }
 
+// Testo embeddato per nota: titolo + punti chiave. I tag restano fuori
+// (già coperti dalla ricerca testuale e modificabili dal client).
+export function noteEmbeddingText(title: string, summaryPoints: string[]): string {
+  return [title, ...summaryPoints]
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0)
+    .join("\n");
+}
+
+// Embedding batch con Jina. kind: "document" per le note (task retrieval.passage),
+// "query" per la ricerca (task retrieval.query). Vettori L2-normalizzati (default Jina).
+// Ritorna un vettore per testo, nello stesso ordine.
+export async function embedTexts(
+  texts: string[],
+  kind: "document" | "query",
+): Promise<number[][]> {
+  const res = await fetch("https://api.jina.ai/v1/embeddings", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${Deno.env.get("JINA_API_KEY")}`,
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      model: JINA_EMBEDDING_MODEL,
+      input: texts,
+      task: kind === "query" ? "retrieval.query" : "retrieval.passage",
+      dimensions: EMBEDDING_DIM,
+    }),
+  });
+  if (!res.ok) throw new Error(`jina embeddings: HTTP ${res.status}`);
+  const data = await res.json();
+  const items = Array.isArray(data?.data) ? data.data : [];
+  if (items.length !== texts.length) {
+    throw new Error("jina embeddings: risposta non valida");
+  }
+  // Jina restituisce `index` per ogni elemento: riordina per sicurezza.
+  const vectors: number[][] = new Array(texts.length);
+  for (const item of items) {
+    const v = item?.embedding;
+    if (!Array.isArray(v) || v.length !== EMBEDDING_DIM || typeof item.index !== "number") {
+      throw new Error("jina embeddings: risposta non valida");
+    }
+    vectors[item.index] = v as number[];
+  }
+  return vectors;
+}
+
+// Embedding di un singolo testo.
+export async function embedText(
+  text: string,
+  kind: "document" | "query",
+): Promise<number[]> {
+  return (await embedTexts([text], kind))[0];
+}
+
+// Embedding "best effort" di una nota: null se Jina fallisce.
+// La nota va salvata comunque; senza embedding non comparirà nei risultati semantici.
+export async function embedNoteOrNull(
+  title: string,
+  summaryPoints: string[],
+): Promise<number[] | null> {
+  try {
+    return await embedText(noteEmbeddingText(title, summaryPoints), "document");
+  } catch (e) {
+    console.error("embedding fallito:", e);
+    return null;
+  }
+}
+
 // Campi comuni della nota da inserire.
 export interface NoteInsert {
   user_id: string;
@@ -218,6 +294,7 @@ export interface NoteInsert {
   image_paths?: string[] | null;
   source_name?: string | null;
   read_time_label?: string | null;
+  embedding?: number[] | null;
 }
 
 // Inserisce la nota con la service-role key e ritorna l'id creato.
