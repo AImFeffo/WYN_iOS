@@ -19,6 +19,7 @@ import {
 const MAX_QUERY = 200;
 const MATCH_COUNT = 10;
 const MIN_SIMILARITY = 0.4; // tarata sulle note demo il 2026-09-15
+// Un utente con più di 50 note senza embedding le completa nel corso di più ricerche.
 const BACKFILL_LIMIT = 50;
 
 // Embedda le note dell'utente che non hanno ancora un embedding (precedenti alla
@@ -32,13 +33,17 @@ async function backfillMissingEmbeddings(db: SupabaseClient): Promise<void> {
     .limit(BACKFILL_LIMIT);
   if (error || !missing || missing.length === 0) return;
 
-  const vectors = await embedTexts(
-    missing.map((n) => noteEmbeddingText(n.title, n.summary_points)),
-    "document",
-  );
+  // Titolo e punti chiave entrambi vuoti → testo vuoto: Jina rifiuta l'input vuoto (422),
+  // quindi va scartato prima di chiamare embedTexts per non far fallire tutto il batch.
+  const targets = missing
+    .map((n) => ({ id: n.id, text: noteEmbeddingText(n.title, n.summary_points) }))
+    .filter((t) => t.text.length > 0);
+  if (targets.length === 0) return;
+
+  const vectors = await embedTexts(targets.map((t) => t.text), "document");
   await Promise.all(
-    missing.map((n, i) =>
-      db.from("notes").update({ embedding: vectors[i] }).eq("id", n.id)
+    targets.map((t, i) =>
+      db.from("notes").update({ embedding: vectors[i] }).eq("id", t.id)
     ),
   );
 }

@@ -225,6 +225,34 @@ export function noteEmbeddingText(title: string, summaryPoints: string[]): strin
 // Embedding batch con Jina. kind: "document" per le note (task retrieval.passage),
 // "query" per la ricerca (task retrieval.query). Vettori L2-normalizzati (default Jina).
 // Ritorna un vettore per testo, nello stesso ordine.
+// Estrae e riordina i vettori dalla risposta Jina; lancia se la risposta non è valida.
+export function vectorsFromJinaResponse(data: unknown, count: number): number[][] {
+  const items = (data as { data?: unknown })?.data;
+  if (!Array.isArray(items) || items.length !== count) {
+    throw new Error("jina embeddings: risposta non valida");
+  }
+  const vectors: number[][] = new Array(count);
+  const seen = new Set<number>();
+  for (const item of items) {
+    const v = (item as { embedding?: unknown })?.embedding;
+    const index = (item as { index?: unknown })?.index;
+    if (
+      !Array.isArray(v) ||
+      v.length !== EMBEDDING_DIM ||
+      typeof index !== "number" ||
+      !Number.isInteger(index) ||
+      index < 0 ||
+      index >= count ||
+      seen.has(index)
+    ) {
+      throw new Error("jina embeddings: risposta non valida");
+    }
+    seen.add(index);
+    vectors[index] = v as number[];
+  }
+  return vectors;
+}
+
 export async function embedTexts(
   texts: string[],
   kind: "document" | "query",
@@ -244,20 +272,7 @@ export async function embedTexts(
   });
   if (!res.ok) throw new Error(`jina embeddings: HTTP ${res.status}`);
   const data = await res.json();
-  const items = Array.isArray(data?.data) ? data.data : [];
-  if (items.length !== texts.length) {
-    throw new Error("jina embeddings: risposta non valida");
-  }
-  // Jina restituisce `index` per ogni elemento: riordina per sicurezza.
-  const vectors: number[][] = new Array(texts.length);
-  for (const item of items) {
-    const v = item?.embedding;
-    if (!Array.isArray(v) || v.length !== EMBEDDING_DIM || typeof item.index !== "number") {
-      throw new Error("jina embeddings: risposta non valida");
-    }
-    vectors[item.index] = v as number[];
-  }
-  return vectors;
+  return vectorsFromJinaResponse(data, texts.length);
 }
 
 // Embedding di un singolo testo.
