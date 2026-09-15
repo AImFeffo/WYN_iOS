@@ -6,11 +6,15 @@ import Supabase
 struct NotesService {
     private var client: SupabaseClient { SupabaseManager.client }
 
+    /// Colonne della nota. `embedding` è esclusa: 512 float per nota inutili al client.
+    private static let columns =
+        "id,user_id,source_type,url,image_paths,title,summary_points,category,tags,source_name,thumbnail_url,read_time_label,created_at"
+
     /// Tutte le note dell'utente, ordinate dal più recente.
     func fetchNotes() async throws -> [Note] {
         try await client
             .from("notes")
-            .select()
+            .select(Self.columns)
             .order("created_at", ascending: false)
             .execute()
             .value
@@ -20,11 +24,21 @@ struct NotesService {
     func fetchNote(id: UUID) async throws -> Note {
         try await client
             .from("notes")
-            .select()
+            .select(Self.columns)
             .eq("id", value: id)
             .single()
             .execute()
             .value
+    }
+
+    /// Id delle note simili per significato alla query, ordinati per somiglianza.
+    /// Chiama la Edge Function `search-notes` (RLS: solo note dell'utente).
+    func semanticMatches(query: String) async throws -> [UUID] {
+        let response: SemanticSearchResponse = try await client.functions.invoke(
+            "search-notes",
+            options: FunctionInvokeOptions(body: ["query": query])
+        )
+        return response.matches.map(\.id)
     }
 
     /// Aggiorna i tag di una nota (normalizzati). Rispetta RLS (client utente).
@@ -51,4 +65,12 @@ struct NotesService {
             .from("screenshots")
             .createSignedURL(path: path, expiresIn: 3600)
     }
+}
+
+private struct SemanticSearchResponse: Decodable {
+    struct Match: Decodable {
+        let id: UUID
+        let similarity: Double
+    }
+    let matches: [Match]
 }
