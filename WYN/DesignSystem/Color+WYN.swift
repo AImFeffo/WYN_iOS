@@ -1,18 +1,5 @@
 import SwiftUI
 
-extension Color {
-    /// Inizializza da un intero esadecimale, es. `Color(hex: 0x2C5266)`.
-    init(hex: UInt, alpha: Double = 1.0) {
-        self.init(
-            .sRGB,
-            red: Double((hex >> 16) & 0xFF) / 255.0,
-            green: Double((hex >> 8) & 0xFF) / 255.0,
-            blue: Double(hex & 0xFF) / 255.0,
-            opacity: alpha
-        )
-    }
-}
-
 /// Token semantici del design system "warm paper" (§7).
 /// I valori light/dark sono definiti nell'Asset Catalog.
 extension Color {
@@ -24,4 +11,12 @@ extension Color {
     static let hairline = Color("hairline")
     static let hairlineStrong = Color("hairlineStrong")
     static let danger = Color("danger")
+    /// Ex valore di `ink3`: solo glifi (chevron, ×) e divisori. Mai per testo.
+    static let inkDecor = Color("inkDecor")
+    /// Sfondo del termine trovato in ricerca (oro Business al 32% / 40%).
+    static let match = Color("match")
+    /// Riempimento tenue di tag, badge e bottoni secondari (ink al 5% / 7%).
+    static let fill = Color("fill")
+    /// Colore di avanzamento della card "in arrivo".
+    static let accent = Color("accentProgress")
 }

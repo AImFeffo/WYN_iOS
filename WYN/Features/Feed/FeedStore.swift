@@ -65,4 +65,6 @@ struct ProcessingItem: Identifiable, Equatable {
 struct ProcessingError: Identifiable, Equatable {
     let id = UUID()
     let message: String
+    /// Tipo di contenuto fallito: decide solo l'etichetta della card.
+    let kind: SourceType
 }

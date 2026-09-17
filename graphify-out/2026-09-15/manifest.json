@@ -1,0 +1,527 @@
+{
+  ".claude/settings.json": {
+    "mtime": 1783970809.3837574,
+    "ast_hash": "1c9c2cb7fda3a39638df31b804086659",
+    "semantic_hash": "1c9c2cb7fda3a39638df31b804086659"
+  },
+  "WYN/App/RootTabView.swift": {
+    "mtime": 1783858521.1347783,
+    "ast_hash": "cb32c7d0c85b9f0a2b8ca97412f00f7a",
+    "semantic_hash": "cb32c7d0c85b9f0a2b8ca97412f00f7a"
+  },
+  "WYN/App/ThemeManager.swift": {
+    "mtime": 1783855428.7120576,
+    "ast_hash": "0c981e204d103afea81cdddb5bacd07c",
+    "semantic_hash": "0c981e204d103afea81cdddb5bacd07c"
+  },
+  "WYN/App/WYNApp.swift": {
+    "mtime": 1783855767.739265,
+    "ast_hash": "6fd1e6077d88e240b45a075b5db2a4cc",
+    "semantic_hash": "6fd1e6077d88e240b45a075b5db2a4cc"
+  },
+  "WYN/DesignSystem/Color+WYN.swift": {
+    "mtime": 1789208222.399219,
+    "ast_hash": "869809069378a652743dbd4ec483cbe4",
+    "semantic_hash": ""
+  },
+  "WYN/DesignSystem/Components.swift": {
+    "mtime": 1789208495.5054772,
+    "ast_hash": "ebf2c70db99e0ffaff2b2c5a2d086c69",
+    "semantic_hash": ""
+  },
+  "WYN/DesignSystem/DateFormatting.swift": {
+    "mtime": 1783856131.3923173,
+    "ast_hash": "3e8aa04d5a5e4284f7054d454f36b294",
+    "semantic_hash": "3e8aa04d5a5e4284f7054d454f36b294"
+  },
+  "WYN/DesignSystem/FlowLayout.swift": {
+    "mtime": 1783856501.5113099,
+    "ast_hash": "24301795e5a045f397b9c19570bf30fd",
+    "semantic_hash": "24301795e5a045f397b9c19570bf30fd"
+  },
+  "WYN/DesignSystem/Font+WYN.swift": {
+    "mtime": 1783855292.4998584,
+    "ast_hash": "c43d49fa062463eb23a9186f775a0859",
+    "semantic_hash": "c43d49fa062463eb23a9186f775a0859"
+  },
+  "WYN/DesignSystem/Haptics.swift": {
+    "mtime": 1783883189.2802155,
+    "ast_hash": "f9cea3606fef27ad5403f73918320b72",
+    "semantic_hash": "f9cea3606fef27ad5403f73918320b72"
+  },
+  "WYN/DesignSystem/String+Extensions.swift": {
+    "mtime": 1783855394.8851614,
+    "ast_hash": "a876a55ca03512c7c03add2ac8fede60",
+    "semantic_hash": "a876a55ca03512c7c03add2ac8fede60"
+  },
+  "WYN/DesignSystem/UIKitBridges.swift": {
+    "mtime": 1783856343.671722,
+    "ast_hash": "42cb807bdc87c9bc2172881380bc58e0",
+    "semantic_hash": "42cb807bdc87c9bc2172881380bc58e0"
+  },
+  "WYN/Features/Auth/AuthContainerView.swift": {
+    "mtime": 1783855419.0006635,
+    "ast_hash": "832ea167487f0320b694342504df6242",
+    "semantic_hash": "832ea167487f0320b694342504df6242"
+  },
+  "WYN/Features/Auth/AuthError.swift": {
+    "mtime": 1783855314.938678,
+    "ast_hash": "159d9baa78b2a4da5be3076d32316988",
+    "semantic_hash": "159d9baa78b2a4da5be3076d32316988"
+  },
+  "WYN/Features/Auth/AuthScaffold.swift": {
+    "mtime": 1783855365.1444087,
+    "ast_hash": "22398f45d0abcdfa1108ad6cab6c9fda",
+    "semantic_hash": "22398f45d0abcdfa1108ad6cab6c9fda"
+  },
+  "WYN/Features/Auth/AuthViewModel.swift": {
+    "mtime": 1783855304.203366,
+    "ast_hash": "5956dbb794750b37c50a6b0e22320c94",
+    "semantic_hash": "5956dbb794750b37c50a6b0e22320c94"
+  },
+  "WYN/Features/Auth/LoginView.swift": {
+    "mtime": 1783855348.9846416,
+    "ast_hash": "e916dd1d9122e0804c3f81557b8652fc",
+    "semantic_hash": "e916dd1d9122e0804c3f81557b8652fc"
+  },
+  "WYN/Features/Auth/RegisterView.swift": {
+    "mtime": 1783855410.2124927,
+    "ast_hash": "c876a18e4e99964aabd6dc8ad72c2842",
+    "semantic_hash": "c876a18e4e99964aabd6dc8ad72c2842"
+  },
+  "WYN/Features/Categories/CategoriesView.swift": {
+    "mtime": 1789212168.213501,
+    "ast_hash": "e6031446c9979dff33106029be3102b1",
+    "semantic_hash": ""
+  },
+  "WYN/Features/Detail/NoteDetailView.swift": {
+    "mtime": 1789211111.7695599,
+    "ast_hash": "d8a0e822b36385e8a16fb06423a083d1",
+    "semantic_hash": ""
+  },
+  "WYN/Features/Detail/TagEditorSheet.swift": {
+    "mtime": 1789211121.8861868,
+    "ast_hash": "2758d6a80f81dac931c75727e43b1af3",
+    "semantic_hash": ""
+  },
+  "WYN/Features/Feed/AddBar.swift": {
+    "mtime": 1789208664.2679272,
+    "ast_hash": "23b74c28df40a2a8b6038e5bc8c82dac",
+    "semantic_hash": ""
+  },
+  "WYN/Features/Feed/FeedStore.swift": {
+    "mtime": 1789209710.3582196,
+    "ast_hash": "ab8d8df68b4d5ff825f5a8ca73932a2c",
+    "semantic_hash": ""
+  },
+  "WYN/Features/Feed/FeedView.swift": {
+    "mtime": 1789216276.5899475,
+    "ast_hash": "9028f63e24722159f2ab8c1649d55ef5",
+    "semantic_hash": ""
+  },
+  "WYN/Features/Feed/FilterChips.swift": {
+    "mtime": 1783856186.3931875,
+    "ast_hash": "54166e834405617b007fc4702173feeb",
+    "semantic_hash": "54166e834405617b007fc4702173feeb"
+  },
+  "WYN/Features/Feed/ImagePickers.swift": {
+    "mtime": 1783857489.3357654,
+    "ast_hash": "7e31d40131dc856bc0be5129c9f595ca",
+    "semantic_hash": "7e31d40131dc856bc0be5129c9f595ca"
+  },
+  "WYN/Features/Feed/NoteCard.swift": {
+    "mtime": 1789209349.2469738,
+    "ast_hash": "06597f9c25b146d7ad3ff8ef7282276c",
+    "semantic_hash": ""
+  },
+  "WYN/Features/Feed/ScreenshotSheet.swift": {
+    "mtime": 1789212736.5605173,
+    "ast_hash": "41696333a10a9cd5a3bcfc298f50b32e",
+    "semantic_hash": ""
+  },
+  "WYN/Features/Feed/StatusCards.swift": {
+    "mtime": 1789209706.5736334,
+    "ast_hash": "cebf680d0ffeef46438e6ac032df8ef1",
+    "semantic_hash": ""
+  },
+  "WYN/Features/Profile/NoteExporter.swift": {
+    "mtime": 1783856568.2806766,
+    "ast_hash": "0c5f541df4eaeb3b3c873e6fc9b7632a",
+    "semantic_hash": "0c5f541df4eaeb3b3c873e6fc9b7632a"
+  },
+  "WYN/Features/Profile/ProfileView.swift": {
+    "mtime": 1789212317.556135,
+    "ast_hash": "4a7e9123fa04adfc68906e4f1d6b2ea3",
+    "semantic_hash": ""
+  },
+  "WYN/Features/Search/SearchView.swift": {
+    "mtime": 1789211683.4222515,
+    "ast_hash": "0d8cb6c47820ec7fc32beb5b3b0848d0",
+    "semantic_hash": ""
+  },
+  "WYN/Models/Category.swift": {
+    "mtime": 1789207945.0993953,
+    "ast_hash": "f8f581bf2d27804ed359b637f8b5402c",
+    "semantic_hash": ""
+  },
+  "WYN/Models/Note.swift": {
+    "mtime": 1783856638.302332,
+    "ast_hash": "1fa9dd2f6df28964ccf09b7319681519",
+    "semantic_hash": "1fa9dd2f6df28964ccf09b7319681519"
+  },
+  "WYN/Resources/Assets.xcassets/AccentColor.colorset/Contents.json": {
+    "mtime": 1783855262.1379642,
+    "ast_hash": "b669e31855af77c3e9561cb3efa77ca6",
+    "semantic_hash": "b669e31855af77c3e9561cb3efa77ca6"
+  },
+  "WYN/Resources/Assets.xcassets/AppIcon.appiconset/Contents.json": {
+    "mtime": 1783881371.2313764,
+    "ast_hash": "4d41e8b29b6713197f46c7d0367e8b74",
+    "semantic_hash": "4d41e8b29b6713197f46c7d0367e8b74"
+  },
+  "WYN/Resources/Assets.xcassets/Contents.json": {
+    "mtime": 1783855262.1380236,
+    "ast_hash": "0274c95478fad391485598930f9655f9",
+    "semantic_hash": "0274c95478fad391485598930f9655f9"
+  },
+  "WYN/Resources/Assets.xcassets/bg.colorset/Contents.json": {
+    "mtime": 1783855262.1367524,
+    "ast_hash": "c0b0a1b8961df27461c1a66976e27534",
+    "semantic_hash": "c0b0a1b8961df27461c1a66976e27534"
+  },
+  "WYN/Resources/Assets.xcassets/danger.colorset/Contents.json": {
+    "mtime": 1783855262.1373703,
+    "ast_hash": "9656b06264cf3852b6ac6a8fca891a24",
+    "semantic_hash": "9656b06264cf3852b6ac6a8fca891a24"
+  },
+  "WYN/Resources/Assets.xcassets/hairline.colorset/Contents.json": {
+    "mtime": 1783855262.137492,
+    "ast_hash": "09ec9eaa9b4af450508eda0c78b006e5",
+    "semantic_hash": "09ec9eaa9b4af450508eda0c78b006e5"
+  },
+  "WYN/Resources/Assets.xcassets/hairlineStrong.colorset/Contents.json": {
+    "mtime": 1783855262.1377046,
+    "ast_hash": "87f4dd441201cd7274871e6821c90ffb",
+    "semantic_hash": "87f4dd441201cd7274871e6821c90ffb"
+  },
+  "WYN/Resources/Assets.xcassets/ink.colorset/Contents.json": {
+    "mtime": 1783855262.1370068,
+    "ast_hash": "b669e31855af77c3e9561cb3efa77ca6",
+    "semantic_hash": "b669e31855af77c3e9561cb3efa77ca6"
+  },
+  "WYN/Resources/Assets.xcassets/ink2.colorset/Contents.json": {
+    "mtime": 1783855262.1371286,
+    "ast_hash": "adb47e03367cf1e014ce3a7909dd5d8b",
+    "semantic_hash": "adb47e03367cf1e014ce3a7909dd5d8b"
+  },
+  "WYN/Resources/Assets.xcassets/ink3.colorset/Contents.json": {
+    "mtime": 1789207945.0995584,
+    "ast_hash": "f4fd381e500aa3113d6b7d4effc983cc",
+    "semantic_hash": ""
+  },
+  "WYN/Resources/Assets.xcassets/surface.colorset/Contents.json": {
+    "mtime": 1783855262.1368873,
+    "ast_hash": "7d3246e0078da4d4794adab975e8d38b",
+    "semantic_hash": "7d3246e0078da4d4794adab975e8d38b"
+  },
+  "WYN/Services/AppGroupStorage.swift": {
+    "mtime": 1783857970.364383,
+    "ast_hash": "5a3132ff7ea9041893f58c7431893782",
+    "semantic_hash": "5a3132ff7ea9041893f58c7431893782"
+  },
+  "WYN/Services/ImageCompressor.swift": {
+    "mtime": 1783857473.7281725,
+    "ast_hash": "b764f885498378ad7c1e5e94ccfdf171",
+    "semantic_hash": "b764f885498378ad7c1e5e94ccfdf171"
+  },
+  "WYN/Services/NotesService.swift": {
+    "mtime": 1783856104.2392275,
+    "ast_hash": "cbce76313df1804e81648ac110ff8f90",
+    "semantic_hash": "cbce76313df1804e81648ac110ff8f90"
+  },
+  "WYN/Services/ProcessingService.swift": {
+    "mtime": 1783857458.4048855,
+    "ast_hash": "8e3bf68e5656b6749ff7bcf5c0d657bb",
+    "semantic_hash": "8e3bf68e5656b6749ff7bcf5c0d657bb"
+  },
+  "WYN/Services/SupabaseConfig.swift": {
+    "mtime": 1783855162.6276848,
+    "ast_hash": "9ede8e12816081d0f7b188bdd51a180d",
+    "semantic_hash": "9ede8e12816081d0f7b188bdd51a180d"
+  },
+  "WYN/Services/SupabaseManager.swift": {
+    "mtime": 1783858092.205974,
+    "ast_hash": "b628e7f105cb35a9ffd5cdbe31de7b9d",
+    "semantic_hash": "b628e7f105cb35a9ffd5cdbe31de7b9d"
+  },
+  "WYN/ShareExtension/ShareRootView.swift": {
+    "mtime": 1783858264.7285256,
+    "ast_hash": "2e82025b116cab1351c0117fd5146e78",
+    "semantic_hash": "2e82025b116cab1351c0117fd5146e78"
+  },
+  "WYN/ShareExtension/ShareViewController.swift": {
+    "mtime": 1783858236.6822627,
+    "ast_hash": "e706e81aa02fb1f31a7cda65dd4c9159",
+    "semantic_hash": "e706e81aa02fb1f31a7cda65dd4c9159"
+  },
+  "supabase/.temp/linked-project.json": {
+    "mtime": 1783853437.0982814,
+    "ast_hash": "778e82879095141842738580cc2896c1",
+    "semantic_hash": "778e82879095141842738580cc2896c1"
+  },
+  "supabase/functions/_shared/wyn.ts": {
+    "mtime": 1783853095.0547569,
+    "ast_hash": "babf56b6a820119ec4bd4bdc1a2a799f",
+    "semantic_hash": "babf56b6a820119ec4bd4bdc1a2a799f"
+  },
+  "supabase/functions/process-link/index.ts": {
+    "mtime": 1783853117.388842,
+    "ast_hash": "2862d70756293672bfb772e866a9b018",
+    "semantic_hash": "2862d70756293672bfb772e866a9b018"
+  },
+  "supabase/functions/process-screenshot/index.ts": {
+    "mtime": 1783853142.8298304,
+    "ast_hash": "3ae6bc1842a0c0c6783f94f5c1f997e7",
+    "semantic_hash": "3ae6bc1842a0c0c6783f94f5c1f997e7"
+  },
+  "WYN/Resources/Assets.xcassets/catAltro.colorset/Contents.json": {
+    "mtime": 1789207945.1128106,
+    "ast_hash": "94277af20816e5564524e6848ba39bd7",
+    "semantic_hash": ""
+  },
+  "WYN/Resources/Assets.xcassets/catBusiness.colorset/Contents.json": {
+    "mtime": 1789207945.1130102,
+    "ast_hash": "6f9912737059b4b33a58bf6b84e8bb59",
+    "semantic_hash": ""
+  },
+  "WYN/Resources/Assets.xcassets/catCucina.colorset/Contents.json": {
+    "mtime": 1789207945.1133714,
+    "ast_hash": "b8cec30d8196ea214be0c66e3d2f5cc3",
+    "semantic_hash": ""
+  },
+  "WYN/Resources/Assets.xcassets/catDesign.colorset/Contents.json": {
+    "mtime": 1789207945.113515,
+    "ast_hash": "9532da3448dcd822a8559ceb08ce1843",
+    "semantic_hash": ""
+  },
+  "WYN/Resources/Assets.xcassets/catFinanza.colorset/Contents.json": {
+    "mtime": 1789207945.1137125,
+    "ast_hash": "1a060af9a06e28451b6f69ecbfbcd67b",
+    "semantic_hash": ""
+  },
+  "WYN/Resources/Assets.xcassets/catSalute.colorset/Contents.json": {
+    "mtime": 1789207945.1139357,
+    "ast_hash": "88b34567f85cb0c3b3e1406e001e13f3",
+    "semantic_hash": ""
+  },
+  "WYN/Resources/Assets.xcassets/catTech.colorset/Contents.json": {
+    "mtime": 1789207945.1140501,
+    "ast_hash": "6523ce7b73761ea8cc2b1e2cde9fa620",
+    "semantic_hash": ""
+  },
+  "WYN/Resources/Assets.xcassets/fill.colorset/Contents.json": {
+    "mtime": 1789207945.1142726,
+    "ast_hash": "440aacabfe894d6d1bb280fbbd74864d",
+    "semantic_hash": ""
+  },
+  "WYN/Resources/Assets.xcassets/inkDecor.colorset/Contents.json": {
+    "mtime": 1789207945.1146383,
+    "ast_hash": "3d85dfb7319a6a54c3ab4e83b1e63999",
+    "semantic_hash": ""
+  },
+  "WYN/Resources/Assets.xcassets/match.colorset/Contents.json": {
+    "mtime": 1789207945.114783,
+    "ast_hash": "5c88465417e3462415bbaa407f1443be",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/UI_REDESIGN_PLAN/constraints.md": {
+    "mtime": 1789207401.3653655,
+    "ast_hash": "89ae4e1795e6c8f0aa274b607d5e0282",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/UI_REDESIGN_PLAN/progress.md": {
+    "mtime": 1789216243.941824,
+    "ast_hash": "02c53bdb947a7c4028c798539a522895",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-0-brief.md": {
+    "mtime": 1789207362.220631,
+    "ast_hash": "8aad93f096dc14bbe55a93025f7b537e",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-0-report.md": {
+    "mtime": 1789207760.8473406,
+    "ast_hash": "64803ece8184685beee7f0144a5a4798",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-1-brief.md": {
+    "mtime": 1789207362.253272,
+    "ast_hash": "5a99644d872287648e55a5e54ee957de",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-2-brief.md": {
+    "mtime": 1789207393.2101207,
+    "ast_hash": "beee4ea597a3cafe4168eac07f4190cb",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-3a-brief.md": {
+    "mtime": 1789207393.2362301,
+    "ast_hash": "754c46416a934b35b76098ef727c8b8a",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-3b-brief.md": {
+    "mtime": 1789207393.261827,
+    "ast_hash": "cde479df4c60b47a7b4e073d000d483e",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-3c-brief.md": {
+    "mtime": 1789207393.2872746,
+    "ast_hash": "684835074fc7a0beda4c9cf3fcd04c49",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-3d-brief.md": {
+    "mtime": 1789207393.3123095,
+    "ast_hash": "6883b0b5b344ad9fd26707236ce977e6",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-4-brief.md": {
+    "mtime": 1789207393.3369052,
+    "ast_hash": "4bbbd35618f545ca94bbbf5e4fef5d4f",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-5-brief.md": {
+    "mtime": 1789207393.3621361,
+    "ast_hash": "f15719e648fc57ed9e69c6acedb64c1e",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-6-brief.md": {
+    "mtime": 1789207393.388368,
+    "ast_hash": "2a9e06f3c51db1f07e1d694d2e515adf",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-7-brief.md": {
+    "mtime": 1789207393.4135816,
+    "ast_hash": "9c566aaf303f586ec2a19b061a637f98",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-8-brief.md": {
+    "mtime": 1789207393.4391265,
+    "ast_hash": "66565d348de7b57a15ffb8bd3f85c245",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-9-brief.md": {
+    "mtime": 1789207393.4640107,
+    "ast_hash": "43bf3ca638c189577c442e9b93434941",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/UI_REDESIGN_PLAN/verify-toolkit.md": {
+    "mtime": 1789209575.5510767,
+    "ast_hash": "5f4d07678e1c9c382a620c4c47b4ab68",
+    "semantic_hash": ""
+  },
+  "CLAUDE.md": {
+    "mtime": 1783970962.9237843,
+    "ast_hash": "486f3a228f7b1bf31c174772380358fc",
+    "semantic_hash": ""
+  },
+  "UI_REDESIGN_PLAN.md": {
+    "mtime": 1789207945.1123126,
+    "ast_hash": "195f34a9fedd3af639e89aef5a571b89",
+    "semantic_hash": ""
+  },
+  "features.md": {
+    "mtime": 1783539395.9594893,
+    "ast_hash": "bad55c9f0b737b3c82fae123d7582ef2",
+    "semantic_hash": ""
+  },
+  "project.yml": {
+    "mtime": 1783880856.9716012,
+    "ast_hash": "60e8ed4e5a830e09d1ecb9a4401b40b9",
+    "semantic_hash": ""
+  },
+  "prompt_wyn_ios.md": {
+    "mtime": 1783851676.261129,
+    "ast_hash": "9575d608945ba50b8c2e714b220656de",
+    "semantic_hash": ""
+  },
+  "tasks/instagram-share-plan.md": {
+    "mtime": 1789207945.1150708,
+    "ast_hash": "e56ef46eeb73ed3426aec2877db28b71",
+    "semantic_hash": ""
+  },
+  "tasks/todo.md": {
+    "mtime": 1789216097.333421,
+    "ast_hash": "6d482eac9b21735ab47d53b749c437ea",
+    "semantic_hash": ""
+  },
+  "WYN/Resources/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png": {
+    "mtime": 1783881365.2554646,
+    "ast_hash": "321c35be97c87c830de049c14402269a",
+    "semantic_hash": ""
+  },
+  "WYN_app_icon_light_1024.png": {
+    "mtime": 1781727692.140646,
+    "ast_hash": "321c35be97c87c830de049c14402269a",
+    "semantic_hash": ""
+  },
+  "WYN/Resources/Assets.xcassets/accentProgress.colorset/Contents.json": {
+    "mtime": 1789207945.1125648,
+    "ast_hash": "6523ce7b73761ea8cc2b1e2cde9fa620",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-1-report.md": {
+    "mtime": 1789208336.510608,
+    "ast_hash": "bc40a5341515eeda20ab4a599f49d232",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-2-report.md": {
+    "mtime": 1789208536.8804307,
+    "ast_hash": "30573d365913b0a05c5c6a81cf831a9f",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-3a-report.md": {
+    "mtime": 1789209192.564233,
+    "ast_hash": "83cbb002e2018a84f1471b3f342af429",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-3b-report.md": {
+    "mtime": 1789209558.83978,
+    "ast_hash": "f6a38a89c6f0a98ce9354f1e103cc4bd",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-3c-report.md": {
+    "mtime": 1789210057.0778778,
+    "ast_hash": "87801354bd92de98ee631007dd63c931",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-3d-report.md": {
+    "mtime": 1789210940.2846112,
+    "ast_hash": "0c1b0336a983c4cb2ed1ee75d4a55560",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-4-report.md": {
+    "mtime": 1789211557.5890098,
+    "ast_hash": "3e89970bb87fbfa31afe6c2f83d3451e",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-5-report.md": {
+    "mtime": 1789212080.7908113,
+    "ast_hash": "8fae1e9b795f200d3260c69f340f88bd",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-6-7-report.md": {
+    "mtime": 1789212639.0888114,
+    "ast_hash": "b209e496d03c9017001f3d1c0f7ef855",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-8-report.md": {
+    "mtime": 1789213492.2526693,
+    "ast_hash": "809564f70765528c8fc87aa9b6cd0d46",
+    "semantic_hash": ""
+  },
+  ".superpowers/sdd/UI_REDESIGN_PLAN/task-9-report.md": {
+    "mtime": 1789216182.9748833,
+    "ast_hash": "4dcc6fd54b0838cd47aa793a2e1aea61",
+    "semantic_hash": ""
+  }
+}

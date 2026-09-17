@@ -87,12 +87,12 @@ struct TagEditorSheet: View {
                         tags.removeAll { $0 == tag }
                     } label: {
                         Image(systemName: "xmark").font(.system(size: 9, weight: .bold))
-                            .foregroundStyle(Color.ink3)
+                            .foregroundStyle(Color.inkDecor)
                     }
                 }
                 .padding(.horizontal, 10)
                 .padding(.vertical, 7)
-                .background(Color.ink.opacity(0.05))
+                .background(Color.fill)
                 .clipShape(Capsule())
             }
         }
@@ -110,14 +110,14 @@ struct TagEditorSheet: View {
 struct FlowTags: View {
     let tags: [String]
     var body: some View {
-        FlowLayout(spacing: 8) {
+        FlowLayout(spacing: 6) {
             ForEach(tags, id: \.self) { tag in
                 Text(tag)
-                    .font(.mono(12, weight: .medium))
+                    .font(.mono(10.5, weight: .medium))
                     .foregroundStyle(Color.ink2)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .background(Color.ink.opacity(0.05))
+                    .padding(.horizontal, 9)
+                    .padding(.vertical, 5)
+                    .background(Color.fill)
                     .clipShape(Capsule())
             }
         }

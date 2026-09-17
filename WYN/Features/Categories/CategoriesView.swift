@@ -6,8 +6,8 @@ struct CategoriesView: View {
     var onSelect: (Category) -> Void
 
     private let columns = [
-        GridItem(.flexible(), spacing: 14),
-        GridItem(.flexible(), spacing: 14),
+        GridItem(.flexible(), spacing: 12),
+        GridItem(.flexible(), spacing: 12),
     ]
 
     /// Conteggio note per categoria.
@@ -16,10 +16,15 @@ struct CategoriesView: View {
             .mapValues(\.count)
     }
 
-    /// Solo categorie con almeno una nota; fallback: tutte.
+    /// Solo categorie con almeno una nota, dalla più usata; fallback: tutte.
     private var displayed: [Category] {
         let withNotes = Category.allCases.filter { (counts[$0] ?? 0) > 0 }
-        return withNotes.isEmpty ? Category.allCases : withNotes
+        guard !withNotes.isEmpty else { return Category.allCases }
+        let order = Dictionary(uniqueKeysWithValues: Category.allCases.enumerated().map { ($1, $0) })
+        return withNotes.sorted {
+            let (a, b) = (counts[$0] ?? 0, counts[$1] ?? 0)
+            return a != b ? a > b : order[$0]! < order[$1]!
+        }
     }
 
     var body: some View {
@@ -34,7 +39,7 @@ struct CategoriesView: View {
                             .foregroundStyle(Color.ink)
                             .padding(.horizontal, 20)
 
-                        LazyVGrid(columns: columns, spacing: 14) {
+                        LazyVGrid(columns: columns, spacing: 12) {
                             ForEach(displayed) { cat in
                                 Button { onSelect(cat) } label: {
                                     CategoryTile(category: cat, count: counts[cat] ?? 0)

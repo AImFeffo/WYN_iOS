@@ -128,3 +128,31 @@ Share Extension (tap share sheet), fotocamera, PHPicker interattivo, notifiche, 
 - `Category` non rinominato: compila senza collisioni (warning SourceKit "OpaquePointer" era rumore).
 - Modello AI `claude-sonnet-4-6` come da spec (centralizzato in `_shared/wyn.ts`); flaggato come possibile ID obsoleto ma funziona.
 - Cruft residuo (rimuovibile dal dashboard): 2 utenti `wyn-test-*@example.com` (0 note) + eventuale utente di test iniziale.
+
+## Redesign UI (mockup Claude Design) ✅
+Piano ed esecuzione: `UI_REDESIGN_PLAN.md` (Task 0–9, 11 commit su `new_features`). Fuori scope: §5 del piano. Screenshot before/after in `tasks/ui-screens/` (non versionati).
+
+## Ricerca semantica — review (2026-09-15)
+
+### Cosa è stato costruito
+- **Migration** (`4229bf5`): colonna `notes.embedding vector(512)` nullable + funzione SQL `match_notes` (RLS via `security invoker`, filtro `user_id = auth.uid()`, similarità coseno), nessun indice vettoriale.
+- **Embedding alla creazione** (`732d3ad`): `process-link`/`process-screenshot` calcolano l'embedding (Jina, titolo + punti chiave) e lo salvano nell'insert, best effort.
+- **Edge Function `search-notes`** (`f976e00`): `POST { query } → { matches: [{ id, similarity }] }`, backfill pigro (max 50 note/chiamata) prima della ricerca, `verify_jwt = false` in config.toml.
+- **Soglia tarata** (`678f66b`): `MIN_SIMILARITY = 0.40`, `MATCH_COUNT = 10`.
+- **`NotesService`** (`6322928`): `fetchNotes`/`fetchNote` con select esplicita (senza `embedding`); nuova `semanticMatches(query:)`.
+- **`SearchView`** (`62aea86`): lista ibrida testo+significato, 4 stati, empty state aggiornato.
+
+### Decisioni prese
+- **Jina invece di Voyage**: stessa `JINA_API_KEY` già usata per il Reader, nessun nuovo secret.
+- **Tag esclusi dal testo embeddato**: solo titolo + punti chiave, così una modifica ai tag non richiede ri-embedding.
+- **Backfill pigro invece di script one-off**: eseguito da `search-notes` stessa alla prima ricerca dell'utente, più semplice da operare.
+- **Soglia 0.40**: tarata il 2026-09-15 sulle note reali — top-1 pertinenti tra 0.41 e 0.76, query non pertinenti fino a 0.28 al massimo.
+
+### Verifiche eseguite
+`deno test` (2 test su `noteEmbeddingText`), `deno check`, curl su `search-notes` (200/400/401, backfill delle 13 note demo confermato via SQL), `xcodebuild` BUILD SUCCEEDED con 0 warning Swift, smoke test su simulatore (lista ibrida, 4 stati semantici, tap su risultato semantico apre il dettaglio). Screenshot in `tasks/ui-screens/cerca-*.png` (non versionati).
+
+### Limitazione nota
+La qualità dei risultati dipende dall'embedding: sulle note demo «come risparmiare» non recupera la nota sull'interesse composto (similarità 0.25, sotto soglia).
+
+### Non fatto
+Screenshot del fallback offline (percorso di errore verificato via code review e un timeout di rete osservato durante i test, non via screenshot).

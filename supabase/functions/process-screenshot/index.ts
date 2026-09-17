@@ -6,6 +6,7 @@
 import {
   analyzeScreenshot,
   CORS_HEADERS,
+  embedNoteOrNull,
   ERR,
   errorResponse,
   insertNote,
@@ -69,6 +70,9 @@ Deno.serve(async (req) => {
     // 4. Analisi con Claude Vision PRIMA dell'upload.
     const analysis = await analyzeScreenshot(imageB64, hint);
 
+    // 4b. Embedding per la ricerca semantica (best effort).
+    const embedding = await embedNoteOrNull(analysis.title, analysis.summary_points);
+
     // 5. Upload su bucket screenshots: <user_id>/<uuid>.jpg
     const db = serviceClient();
     const path = `${userId}/${crypto.randomUUID()}.jpg`;
@@ -88,6 +92,7 @@ Deno.serve(async (req) => {
       summary_points: analysis.summary_points,
       category: analysis.category,
       tags: analysis.tags,
+      embedding,
     });
 
     return jsonResponse({ id });
